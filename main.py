@@ -35,12 +35,12 @@ logger = logging.getLogger(__name__)
 # ─────────────────────────────────────────────
 #  CONFIG
 # ─────────────────────────────────────────────
-BOT_TOKEN    = os.getenv("BOT_TOKEN", "")
+BOT_TOKEN    = os.getenv("BOT_TOKEN", "8716061480:AAGCDc5OadCagPtSOvo_IvedhvMNgQ7uQCs")
 WEBHOOK_URL  = os.getenv("WEBHOOK_URL", "")   # e.g. https://your-app.fly.dev
 PORT         = int(os.getenv("PORT", "8080"))
 
 if not BOT_TOKEN:
-    raise RuntimeError("BOT_TOKEN environment variable is not set!")
+    ("BOT_TOKEN environment variable is not set!")
 
 # ─────────────────────────────────────────────
 #  FASTAPI APP
