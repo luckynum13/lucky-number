@@ -157,7 +157,6 @@ async def telegram_webhook(request: Request):
 # ─────────────────────────────────────────────
 from rooms import ROOMS, calc_room, fisher_yates, PUBLIC_NOMINALS, PLAYER_COUNTS, PRIVATE_NOMINALS
 import random as _random
-
 @app.get("/api/me")
 async def api_me(telegram_id: int):
     user = await get_or_create_user(telegram_id)
