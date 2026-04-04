@@ -1,32 +1,23 @@
-# fly.toml — Fly.io configuration for Lucky Number Bot
+# fly.toml app configuration file generated for lucky-number on 2026-04-04T20:01:56Z
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
 
-app = "lucky-number-bot"
-primary_region = "ams"          # Amsterdam — offshore, outside CIS jurisdiction
+app = 'lucky-number'
+primary_region = 'ams'
 
 [build]
-  dockerfile = "Dockerfile"
-
-[env]
-  PORT = "8080"
 
 [http_service]
   internal_port = 8080
-  force_https   = true
-  auto_stop_machines  = false   # Keep running 24/7 — important for a bot!
+  force_https = true
+  auto_stop_machines = 'stop'
   auto_start_machines = true
-  min_machines_running = 1
-
-  [http_service.concurrency]
-    type       = "connections"
-    hard_limit = 100
-    soft_limit = 80
+  min_machines_running = 0
+  processes = ['app']
 
 [[vm]]
-  memory = "512mb"
-  cpu_kind = "shared"
+  memory = '1gb'
+  cpu_kind = 'shared'
   cpus = 1
-
-# Persistent volume for SQLite database
-[[mounts]]
-  source      = "lucky_data"
-  destination = "/app/data"
+  memory_mb = 256
