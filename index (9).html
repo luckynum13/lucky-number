@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#080B18">
+    <title>Lucky Number</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+        :root {
+            --gold:#D4A843; --gold-light:#F0C866; --gold-dim:rgba(212,168,67,0.15);
+            --teal:#2BBFAA; --teal-dim:rgba(43,191,170,0.15);
+            --bg:#080B18; --bg2:#0F1528; --bg3:#161D35;
+            --border:rgba(255,255,255,0.07); --text:#E8EAF0; --muted:#5A6080; --red:#E05C5C;
+        }
+        body { font-family:'Syne',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; padding-bottom:env(safe-area-inset-bottom,20px); }
+        body::before { content:''; position:fixed; inset:0; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events:none; z-index:0; opacity:0.4; }
+        .wrap { max-width:480px; margin:0 auto; padding:14px 14px 80px; position:relative; z-index:1; }
+
+        .header { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; background:var(--bg2); border-radius:18px; border:1px solid var(--border); margin-bottom:16px; }
+        .logo-mark { font-size:1.4em; font-weight:800; color:var(--gold); }
+        .logo-sub { font-size:0.6em; color:var(--muted); margin-top:1px; }
+        .balance-pill { display:flex; align-items:center; gap:6px; background:var(--gold-dim); border:1px solid rgba(212,168,67,0.3); padding:7px 12px; border-radius:40px; cursor:pointer; }
+        .balance-pill .usd { font-size:1em; font-weight:800; color:var(--gold); font-family:'DM Mono',monospace; }
+        .balance-pill .local { font-size:0.65em; color:var(--muted); }
+
+        .tabs { display:flex; gap:5px; margin-bottom:16px; background:var(--bg2); border-radius:14px; padding:4px; border:1px solid var(--border); }
+        .tab { flex:1; padding:9px 4px; border:none; border-radius:10px; background:transparent; color:var(--muted); font-family:'Syne',sans-serif; font-size:0.68em; font-weight:600; cursor:pointer; text-align:center; transition:all 0.2s; }
+        .tab.active { background:var(--bg3); color:var(--gold); border:1px solid var(--border); }
+
+        .section-label { font-size:0.62em; font-weight:700; color:var(--muted); letter-spacing:2px; text-transform:uppercase; margin:18px 0 10px 2px; }
+        .rooms-grid { display:flex; flex-direction:column; gap:10px; }
+
+        .room-card { background:var(--bg2); border:1px solid var(--border); border-radius:18px; padding:14px 16px; }
+        .room-card.private-room { border-color:rgba(43,191,170,0.3); background:linear-gradient(135deg,rgba(43,191,170,0.05),var(--bg2)); }
+        .room-top { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:10px; }
+        .room-usd { font-size:1.6em; font-weight:800; color:var(--gold); font-family:'DM Mono',monospace; line-height:1; }
+        .room-local { font-size:0.7em; color:var(--muted); margin-top:2px; font-family:'DM Mono',monospace; }
+        .room-badges { display:flex; gap:5px; flex-wrap:wrap; justify-content:flex-end; }
+        .badge { font-size:0.6em; font-weight:600; padding:3px 8px; border-radius:20px; border:1px solid; }
+        .badge-players { color:var(--teal); border-color:rgba(43,191,170,0.4); background:var(--teal-dim); }
+        .badge-private { color:var(--gold); border-color:rgba(212,168,67,0.4); background:var(--gold-dim); }
+        .badge-full { color:var(--red); border-color:rgba(224,92,92,0.4); background:rgba(224,92,92,0.1); }
+
+        .prize-row { display:flex; align-items:center; justify-content:space-between; background:var(--bg3); padding:8px 12px; border-radius:10px; margin-bottom:10px; font-size:0.72em; }
+        .prize-label { color:var(--muted); }
+        .prize-val { color:var(--gold); font-weight:700; font-family:'DM Mono',monospace; }
+        .prize-local { font-size:0.85em; color:var(--muted); font-family:'DM Mono',monospace; }
+
+        .progress-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+        .progress-track { flex:1; height:4px; background:var(--bg3); border-radius:4px; overflow:hidden; }
+        .progress-fill { height:100%; background:linear-gradient(90deg,var(--teal),var(--gold)); border-radius:4px; }
+        .progress-text { font-size:0.65em; color:var(--muted); font-family:'DM Mono',monospace; white-space:nowrap; }
+
+        .number-dots { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:10px; min-height:28px; }
+        .num-dot { width:26px; height:26px; border-radius:50%; background:var(--gold-dim); border:1px solid rgba(212,168,67,0.3); display:flex; align-items:center; justify-content:center; font-size:0.65em; font-weight:700; color:var(--gold); font-family:'DM Mono',monospace; }
+        .num-dot.mine { background:var(--gold); color:var(--bg); border-color:var(--gold); }
+
+        .invite-row { display:flex; align-items:center; gap:8px; background:var(--bg3); padding:7px 12px; border-radius:10px; margin-bottom:8px; }
+        .invite-code-display { font-family:'DM Mono',monospace; font-size:0.85em; letter-spacing:3px; color:var(--teal); flex:1; }
+        .copy-btn { background:none; border:none; color:var(--muted); cursor:pointer; font-size:0.9em; }
+
+        .share-row { display:flex; gap:6px; margin-bottom:10px; }
+        .share-btn { flex:1; padding:7px 4px; border-radius:10px; border:1px solid var(--border); background:var(--bg3); color:var(--text); font-family:'Syne',sans-serif; font-size:0.68em; font-weight:600; cursor:pointer; text-align:center; }
+        .share-btn.tg { border-color:rgba(43,191,170,0.3); color:var(--teal); background:var(--teal-dim); }
+        .share-btn.wa { border-color:rgba(87,196,100,0.3); color:#57C464; background:rgba(87,196,100,0.1); }
+        .share-btn.lnk { color:var(--muted); }
+
+        .join-btn { width:100%; padding:11px; border:none; border-radius:12px; background:linear-gradient(135deg,var(--gold),var(--gold-light)); color:var(--bg); font-family:'Syne',sans-serif; font-size:0.85em; font-weight:700; cursor:pointer; transition:opacity 0.2s,transform 0.1s; }
+        .join-btn:active { transform:scale(0.98); }
+        .join-btn:disabled { opacity:0.3; cursor:not-allowed; background:var(--bg3); color:var(--muted); transform:none; }
+        .join-btn.teal { background:linear-gradient(135deg,var(--teal),#1e9b8a); }
+
+        .fab { position:fixed; bottom:calc(16px + env(safe-area-inset-bottom,0px)); right:16px; width:52px; height:52px; border-radius:50%; background:linear-gradient(135deg,var(--gold),var(--gold-light)); border:none; color:var(--bg); font-size:1.5em; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 20px rgba(212,168,67,0.4); z-index:100; }
+
+        .overlay { display:none; position:fixed; inset:0; background:rgba(8,11,24,0.92); backdrop-filter:blur(6px); z-index:500; align-items:flex-end; justify-content:center; }
+        .overlay.active { display:flex; }
+        .sheet { background:var(--bg2); border-radius:24px 24px 0 0; border:1px solid var(--border); border-bottom:none; padding:24px 20px calc(24px + env(safe-area-inset-bottom,0px)); width:100%; max-width:480px; max-height:90vh; overflow-y:auto; animation:slideUp 0.3s cubic-bezier(0.32,0.72,0,1); }
+        @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+        .sheet-handle { width:36px; height:4px; background:var(--border); border-radius:4px; margin:0 auto 20px; }
+        .sheet-title { font-size:1.1em; font-weight:800; color:var(--gold); margin-bottom:18px; }
+        .form-label { font-size:0.68em; font-weight:700; color:var(--muted); letter-spacing:1.5px; text-transform:uppercase; margin-bottom:8px; display:block; }
+
+        .chips { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:16px; }
+        .chip { padding:7px 13px; border-radius:40px; border:1px solid var(--border); background:var(--bg3); color:var(--text); font-family:'Syne',sans-serif; font-size:0.78em; font-weight:600; cursor:pointer; }
+        .chip.active { background:var(--gold-dim); border-color:rgba(212,168,67,0.5); color:var(--gold); }
+
+        .preview-box { background:var(--bg3); border-radius:14px; padding:14px; margin:14px 0; border:1px solid var(--border); }
+        .preview-row { display:flex; justify-content:space-between; align-items:center; font-size:0.78em; padding:4px 0; }
+        .preview-row .pk { color:var(--muted); }
+        .preview-row .pv { font-weight:700; font-family:'DM Mono',monospace; }
+        .pv.gold { color:var(--gold); } .pv.teal { color:var(--teal); } .pv.red { color:var(--red); }
+        .preview-divider { height:1px; background:var(--border); margin:8px 0; }
+
+        .text-input { width:100%; padding:13px 16px; background:var(--bg3); border:1px solid var(--border); border-radius:12px; color:var(--text); font-family:'DM Mono',monospace; font-size:1em; letter-spacing:3px; text-transform:uppercase; text-align:center; margin-bottom:16px; outline:none; }
+        .text-input:focus { border-color:var(--gold); }
+        .text-input::placeholder { color:var(--muted); letter-spacing:1px; font-size:0.85em; }
+
+        .game-overlay { display:none; position:fixed; inset:0; background:rgba(8,11,24,0.97); z-index:900; align-items:center; justify-content:center; padding:20px; }
+        .game-overlay.active { display:flex; }
+        .game-box { background:var(--bg2); border-radius:24px; border:1px solid var(--border); padding:22px; width:100%; max-width:400px; max-height:90vh; overflow-y:auto; }
+        .game-title { font-size:1em; font-weight:800; margin-bottom:4px; }
+        .game-subtitle { font-size:0.72em; color:var(--muted); margin-bottom:16px; }
+
+        .spinner-wrap { display:flex; align-items:center; justify-content:center; margin:20px 0; }
+        .spinner-ring { width:100px; height:100px; border-radius:50%; border:3px solid var(--border); border-top-color:var(--gold); display:flex; align-items:center; justify-content:center; font-size:2em; font-weight:800; font-family:'DM Mono',monospace; color:var(--gold); }
+        .spinner-ring.spinning { animation:spin 0.4s linear infinite; }
+        @keyframes spin { to{transform:rotate(360deg)} }
+
+        .players-wrap { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin:12px 0; }
+        .p-tile { aspect-ratio:1; border-radius:10px; background:var(--bg3); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:0.85em; font-weight:700; font-family:'DM Mono',monospace; color:var(--muted); }
+        .p-tile.me { color:var(--gold); border-color:rgba(212,168,67,0.4); background:var(--gold-dim); }
+        .p-tile.winner { color:var(--bg); background:linear-gradient(135deg,var(--gold),var(--gold-light)); border-color:var(--gold); animation:winPop 0.4s; }
+        @keyframes winPop { 0%{transform:scale(0.8)} 60%{transform:scale(1.15)} 100%{transform:scale(1)} }
+
+        .result-card { background:linear-gradient(135deg,rgba(212,168,67,0.15),rgba(212,168,67,0.05)); border:1px solid rgba(212,168,67,0.3); border-radius:16px; padding:16px; text-align:center; margin:14px 0; }
+        .result-title { font-size:1.1em; font-weight:800; color:var(--gold); margin-bottom:8px; }
+        .result-row { font-size:0.78em; color:var(--muted); padding:3px 0; }
+        .result-row strong { color:var(--text); }
+        .result-win { font-size:1.3em; font-weight:800; color:var(--gold); margin-top:10px; }
+
+        .history-item { background:var(--bg2); border:1px solid var(--border); border-radius:14px; padding:12px 14px; margin-bottom:8px; font-size:0.75em; }
+        .history-top { display:flex; justify-content:space-between; margin-bottom:6px; }
+        .history-date { color:var(--muted); }
+        .history-win { color:var(--gold); font-weight:700; }
+        .history-loss { color:var(--muted); }
+        .history-detail { color:var(--muted); line-height:1.7; }
+
+        .cabinet-body { text-align:center; }
+        .cabinet-avatar { font-size:3em; margin-bottom:8px; }
+        .cabinet-id { font-family:'DM Mono',monospace; font-size:0.75em; color:var(--muted); margin-bottom:16px; }
+        .cabinet-balance { font-size:2.5em; font-weight:800; color:var(--gold); font-family:'DM Mono',monospace; }
+        .cabinet-balance-local { font-size:0.9em; color:var(--muted); font-family:'DM Mono',monospace; margin-top:4px; }
+        .cabinet-balance-label { font-size:0.7em; color:var(--muted); margin-bottom:20px; }
+        .currency-row { display:flex; align-items:center; gap:8px; background:var(--bg3); border-radius:12px; padding:10px 14px; margin-bottom:16px; font-size:0.78em; }
+        .currency-rate { color:var(--muted); font-family:'DM Mono',monospace; font-size:0.9em; margin-left:auto; }
+        .action-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:16px; }
+        .action-btn { padding:13px; border-radius:14px; border:1px solid var(--border); background:var(--bg3); color:var(--text); font-family:'Syne',sans-serif; font-size:0.82em; font-weight:600; cursor:pointer; }
+        .action-btn.primary { background:var(--gold-dim); border-color:rgba(212,168,67,0.3); color:var(--gold); }
+        .action-btn.danger { background:rgba(224,92,92,0.1); border-color:rgba(224,92,92,0.3); color:var(--red); grid-column:1/-1; }
+
+        .toast { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%) scale(0); z-index:9999; background:linear-gradient(135deg,var(--gold),var(--gold-light)); color:var(--bg); padding:18px 28px; border-radius:20px; font-size:1.1em; font-weight:800; text-align:center; box-shadow:0 0 40px rgba(212,168,67,0.5); pointer-events:none; transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1),opacity 0.3s; opacity:0; }
+        .toast.show { transform:translate(-50%,-50%) scale(1); opacity:1; }
+        .notif { position:fixed; bottom:80px; left:16px; right:16px; max-width:448px; margin:0 auto; background:var(--bg3); border:1px solid var(--border); border-radius:14px; padding:12px 16px; font-size:0.82em; font-weight:600; z-index:8000; transform:translateY(20px); opacity:0; transition:all 0.25s; pointer-events:none; }
+        .notif.show { transform:translateY(0); opacity:1; }
+        .notif.success { border-color:rgba(43,191,170,0.4); color:var(--teal); }
+        .notif.error { border-color:rgba(224,92,92,0.4); color:var(--red); }
+        .empty-state { text-align:center; padding:40px 20px; color:var(--muted); font-size:0.85em; }
+        .empty-state .ei { font-size:2.5em; margin-bottom:10px; }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <div class="header">
+        <div>
+            <div class="logo-mark">🎰 Lucky Number</div>
+            <div class="logo-sub">Play in USD · Pay local</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+            <div class="balance-pill" onclick="openCabinet()">
+                <span class="usd" id="headerUSD">$0.00</span>
+                <span class="local" id="headerLocal"></span>
+            </div>
+            <button style="background:var(--bg3);border:1px solid var(--border);color:var(--muted);padding:7px 10px;border-radius:10px;font-size:0.9em;cursor:pointer;" onclick="openCabinet()">👤</button>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab active" onclick="switchTab('public',this)">🎲 Public</button>
+        <button class="tab" onclick="switchTab('private',this)">🔒 Private</button>
+        <button class="tab" onclick="openJoinModal()">🔑 Code</button>
+        <button class="tab" onclick="switchTab('history',this)">📜 History</button>
+    </div>
+
+    <div id="panelPublic"><div class="rooms-grid" id="publicGrid"></div></div>
+    <div id="panelPrivate" style="display:none;"><div class="rooms-grid" id="privateGrid"></div></div>
+    <div id="panelHistory" style="display:none;"><div class="section-label">Recent games</div><div id="historyGrid"></div></div>
+</div>
+
+<button class="fab" onclick="openCreateModal()">＋</button>
+
+<!-- Create Room -->
+<div class="overlay" id="createOverlay" onclick="overlayClose(event,'createOverlay')">
+    <div class="sheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-title">✨ Create Room</div>
+        <label class="form-label">Bet Amount (USD)</label>
+        <div class="chips" id="nominalChips"></div>
+        <label class="form-label">Players</label>
+        <div class="chips" id="playersChips">
+            <button class="chip active" data-val="3" onclick="selectPlayers(this)">3</button>
+            <button class="chip" data-val="5" onclick="selectPlayers(this)">5</button>
+            <button class="chip" data-val="7" onclick="selectPlayers(this)">7</button>
+            <button class="chip" data-val="10" onclick="selectPlayers(this)">10</button>
+        </div>
+        <label class="form-label">Room Type</label>
+        <div class="chips" id="typeChips">
+            <button class="chip active" data-val="public" onclick="selectType(this)">🌐 Public</button>
+            <button class="chip" data-val="private" onclick="selectType(this)">🔒 Private</button>
+        </div>
+        <div class="preview-box" id="createPreview"></div>
+        <button class="join-btn" onclick="createRoom()">🚀 Create & Join</button>
+        <button class="join-btn" style="background:var(--bg3);color:var(--muted);margin-top:8px;" onclick="closeOverlay('createOverlay')">Cancel</button>
+    </div>
+</div>
+
+<!-- Join by Code -->
+<div class="overlay" id="joinOverlay" onclick="overlayClose(event,'joinOverlay')">
+    <div class="sheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-title">🔑 Join by Code</div>
+        <p style="font-size:0.82em;color:var(--muted);margin-bottom:16px;">Enter the invite code from the room creator</p>
+        <input class="text-input" id="codeInput" placeholder="Enter code" maxlength="6" autocomplete="off">
+        <button class="join-btn teal" onclick="joinByCode()">🔓 Join Room</button>
+        <button class="join-btn" style="background:var(--bg3);color:var(--muted);margin-top:8px;" onclick="closeOverlay('joinOverlay')">Cancel</button>
+    </div>
+</div>
+
+<!-- Cabinet -->
+<div class="overlay" id="cabinetOverlay" onclick="overlayClose(event,'cabinetOverlay')">
+    <div class="sheet">
+        <div class="sheet-handle"></div>
+        <div class="cabinet-body">
+            <div class="cabinet-avatar">🎰</div>
+            <div class="cabinet-id" id="cabUserId">LUCKY_</div>
+            <div class="cabinet-balance" id="cabBalance">$0.00</div>
+            <div class="cabinet-balance-local" id="cabBalanceLocal"></div>
+            <div class="cabinet-balance-label">Balance</div>
+            <div class="currency-row">
+                <span id="currFlag">🌍</span>
+                <span id="currName" style="font-weight:700;">USD</span>
+                <span class="currency-rate" id="currRate">1 USD = 1 USD</span>
+            </div>
+            <div class="action-grid">
+                <button class="action-btn primary" onclick="deposit()">💳 Deposit</button>
+                <button class="action-btn primary" onclick="withdraw()">💸 Withdraw</button>
+                <button class="action-btn danger" onclick="logout()">🚪 Logout</button>
+            </div>
+            <div style="margin-top:16px;font-size:0.7em;color:var(--muted);">Support: @LuckyNumberSupport</div>
+        </div>
+    </div>
+</div>
+
+<!-- Game Modal -->
+<div class="game-overlay" id="gameOverlay">
+    <div class="game-box">
+        <div class="game-title" id="gameTitle"></div>
+        <div class="game-subtitle" id="gameSubtitle"></div>
+        <div class="spinner-wrap"><div class="spinner-ring" id="spinnerRing">🎲</div></div>
+        <div class="players-wrap" id="playersTiles"></div>
+        <div id="gameStatusText" style="font-size:0.82em;color:var(--muted);text-align:center;margin:8px 0;"></div>
+        <div id="gameInviteRow" style="display:none;"></div>
+        <div id="gameResultCard"></div>
+        <button id="gameCloseBtn" class="join-btn" style="display:none;margin-top:12px;" onclick="closeGame()">Close</button>
+    </div>
+</div>
+
+<div class="toast" id="winToast"></div>
+<div class="notif" id="notif"></div>
+
+<script>
+// ══════════════════════════════════════
+//  TELEGRAM INIT
+// ══════════════════════════════════════
+const tg = window.Telegram.WebApp;
+tg.ready(); tg.expand(); tg.enableClosingConfirmation();
+const tgUser = tg.initDataUnsafe?.user;
+const TG_ID   = tgUser?.id || ('demo_' + Math.random().toString(36).substr(2,6));
+const TG_NAME = tgUser?.first_name || tgUser?.username || 'Player';
+const TG_LANG = tgUser?.language_code || navigator.language?.split('-')[0] || 'en';
+tg.MainButton.setText('💰 Deposit');
+tg.MainButton.onClick(() => deposit());
+tg.MainButton.show();
+
+// ══════════════════════════════════════
+//  CURRENCY CONFIG
+// ══════════════════════════════════════
+const CURRENCIES = {
+    ru: { code:'RUB', symbol:'₽', flag:'🇷🇺', name:'Russian Ruble',      rate:92   },
+    az: { code:'AZN', symbol:'₼', flag:'🇦🇿', name:'Azerbaijani Manat',  rate:1.70 },
+    kk: { code:'KZT', symbol:'₸', flag:'🇰🇿', name:'Kazakh Tenge',       rate:450  },
+    uk: { code:'UAH', symbol:'₴', flag:'🇺🇦', name:'Ukrainian Hryvnia',  rate:41   },
+    en: { code:'USD', symbol:'$', flag:'🇺🇸', name:'US Dollar',          rate:1    },
+};
+const CUR = CURRENCIES[TG_LANG] || CURRENCIES['en'];
+
+function toLocal(usd) { return usd * CUR.rate; }
+function fmtLocal(usd) {
+    const v = toLocal(usd);
+    return CUR.symbol + (v >= 1000 ? v.toLocaleString('ru',{maximumFractionDigits:0}) : v.toFixed(2));
+}
+function fmtUSD(usd) { return '$' + (usd % 1 === 0 ? usd : usd.toFixed(2)); }
+
+// ══════════════════════════════════════
+//  GAME CONFIG
+// ══════════════════════════════════════
+const PUBLIC_NOMINALS  = [5, 10, 20, 50, 100];
+const PRIVATE_NOMINALS = [20, 50, 100, 200, 300, 400, 500];
+const PLAYER_COUNTS    = [3, 5, 7, 10];
+const ROOM_CONFIG = {
+    3:  { winners:1, platformMult:1 },
+    5:  { winners:2, platformMult:1 },
+    7:  { winners:3, platformMult:1 },
+    10: { winners:4, platformMult:2 },
+};
+
+function calcRoom(nominal, players) {
+    const cfg = ROOM_CONFIG[players];
+    const pot         = nominal * players;
+    const eachPrize   = nominal * 2;
+    const platformFee = pot - (eachPrize * cfg.winners);
+    return { pot, eachPrize, platformFee, winners: cfg.winners };
+}
+
+// ══════════════════════════════════════
+//  FISHER-YATES SHUFFLE (fair RNG)
+// ══════════════════════════════════════
+function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
+
+// ══════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════
+let userData = null, publicRooms = [], privateRooms = [];
+let currentGameRoom = null, currentGameIsPrivate = false, mySlots = [];
+let createNominal = PUBLIC_NOMINALS[0], createPlayers = 3, createType = 'public';
+
+// ══════════════════════════════════════
+//  USER DATA
+// ══════════════════════════════════════
+function loadUser() {
+    const raw = localStorage.getItem('ln_user_' + TG_ID);
+    userData = raw ? JSON.parse(raw) : { id: TG_ID, name: TG_NAME, balanceUSD: 100, history: [] };
+}
+function saveUser() { localStorage.setItem('ln_user_' + TG_ID, JSON.stringify(userData)); }
+
+// ══════════════════════════════════════
+//  ROOMS
+// ══════════════════════════════════════
+function initPublicRooms() {
+    const saved = localStorage.getItem('ln_public_rooms');
+    const savedList = saved ? JSON.parse(saved) : [];
+    publicRooms = [];
+    for (const nominal of PUBLIC_NOMINALS) {
+        for (const players of PLAYER_COUNTS) {
+            const id = `pub_${nominal}_${players}`;
+            const ex = savedList.find(r => r.id === id);
+            publicRooms.push({ id, nominal, maxPlayers:players, isPrivate:false, players:ex?.players||[], gameActive:ex?.gameActive||false, ...calcRoom(nominal,players) });
+        }
+    }
+}
+function savePublicRooms()  { localStorage.setItem('ln_public_rooms', JSON.stringify(publicRooms)); }
+function loadPrivateRooms() { const r = localStorage.getItem('ln_private_rooms_'+TG_ID); privateRooms = r ? JSON.parse(r) : []; }
+function savePrivateRooms() { localStorage.setItem('ln_private_rooms_'+TG_ID, JSON.stringify(privateRooms)); }
+function genCode() { return Math.random().toString(36).substr(2,6).toUpperCase(); }
+
+// ══════════════════════════════════════
+//  CREATE MODAL
+// ══════════════════════════════════════
+function buildNominalChips() {
+    const list = createType === 'private' ? PRIVATE_NOMINALS : PUBLIC_NOMINALS;
+    document.getElementById('nominalChips').innerHTML = list.map((n,i) =>
+        `<button class="chip ${i===0?'active':''}" data-val="${n}" onclick="selectNominal(this)">${fmtUSD(n)}</button>`
+    ).join('');
+    createNominal = list[0];
+}
+
+function openCreateModal() {
+    createNominal = PUBLIC_NOMINALS[0]; createPlayers = 3; createType = 'public';
+    document.querySelectorAll('#playersChips .chip').forEach((c,i) => c.classList.toggle('active',i===0));
+    document.querySelectorAll('#typeChips .chip').forEach((c,i) => c.classList.toggle('active',i===0));
+    buildNominalChips(); updateCreatePreview();
+    document.getElementById('createOverlay').classList.add('active');
+}
+
+function selectNominal(btn) {
+    document.querySelectorAll('#nominalChips .chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active'); createNominal = parseFloat(btn.dataset.val); updateCreatePreview();
+}
+function selectPlayers(btn) {
+    document.querySelectorAll('#playersChips .chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active'); createPlayers = parseInt(btn.dataset.val); updateCreatePreview();
+}
+function selectType(btn) {
+    document.querySelectorAll('#typeChips .chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active'); createType = btn.dataset.val; buildNominalChips(); updateCreatePreview();
+}
+
+function updateCreatePreview() {
+    const c = calcRoom(createNominal, createPlayers);
+    document.getElementById('createPreview').innerHTML = `
+        <div class="preview-row"><span class="pk">Bet</span><span class="pv gold">${fmtUSD(createNominal)} <span style="color:var(--muted);font-size:0.85em;">(${fmtLocal(createNominal)})</span></span></div>
+        <div class="preview-row"><span class="pk">Players</span><span class="pv">${createPlayers}</span></div>
+        <div class="preview-row"><span class="pk">Total pool</span><span class="pv">${fmtUSD(c.pot)} <span style="color:var(--muted);font-size:0.85em;">(${fmtLocal(c.pot)})</span></span></div>
+        <div class="preview-divider"></div>
+        <div class="preview-row"><span class="pk">Winners</span><span class="pv teal">${c.winners}</span></div>
+        <div class="preview-row"><span class="pk">Each winner gets</span><span class="pv gold">${fmtUSD(c.eachPrize)} <span style="color:var(--muted);font-size:0.85em;">(${fmtLocal(c.eachPrize)})</span></span></div>
+        <div class="preview-divider"></div>
+        <div class="preview-row"><span class="pk">Platform fee</span><span class="pv red">${fmtUSD(c.platformFee)} <span style="color:var(--muted);font-size:0.85em;">(${fmtLocal(c.platformFee)})</span></span></div>
+    `;
+}
+
+function createRoom() {
+    if (!userData || userData.balanceUSD < createNominal) { notify('❌ Insufficient balance!','error'); return; }
+    const calc = calcRoom(createNominal, createPlayers);
+    if (createType === 'private') {
+        const code = genCode();
+        const room = { id:'prv_'+code, nominal:createNominal, maxPlayers:createPlayers, isPrivate:true, inviteCode:code, creatorId:TG_ID, players:[], gameActive:false, ...calc };
+        privateRooms.push(room); savePrivateRooms();
+        closeOverlay('createOverlay'); enterRoom(room, true);
+        setTimeout(() => {
+            tg.showPopup({ title:'🎉 Room created!', message:`Invite code: ${code}\nSend to friends!`,
+                buttons:[{type:'default',text:'📋 Copy code',id:'copy'},{type:'cancel',text:'Close'}]
+            }, (id) => { if(id==='copy'){navigator.clipboard.writeText(code).catch(()=>{}); notify('✅ Code copied!','success');} });
+        }, 300);
+    } else {
+        const room = publicRooms.find(r => r.nominal===createNominal && r.maxPlayers===createPlayers && !r.gameActive && r.players.length < r.maxPlayers);
+        if (!room) { notify('❌ No available room found','error'); return; }
+        closeOverlay('createOverlay'); enterRoom(room, false);
+    }
+}
+
+// ══════════════════════════════════════
+//  JOIN
+// ══════════════════════════════════════
+function joinRoom(roomId, isPrivate) {
+    const room = (isPrivate ? privateRooms : publicRooms).find(r => r.id === roomId);
+    if (room) enterRoom(room, isPrivate);
+}
+
+function enterRoom(room, isPrivate) {
+    if (!userData) return;
+    if (room.gameActive)                        { notify('🎲 Game already running!','error'); return; }
+    if (room.players.length >= room.maxPlayers) { notify('❌ Room is full!','error'); return; }
+    if (userData.balanceUSD < room.nominal)     { notify('❌ Insufficient balance!','error'); return; }
+
+    userData.balanceUSD -= room.nominal; saveUser();
+
+    const takenNums = room.players.map(p => p.number);
+    const available = Array.from({length:room.maxPlayers},(_,i)=>i+1).filter(n=>!takenNums.includes(n));
+    const number = available[Math.floor(Math.random() * available.length)];
+    const playerId = TG_ID + '_' + Date.now();
+
+    room.players.push({ id:playerId, number, name:userData.name, userId:TG_ID });
+    mySlots.push(playerId);
+    if (isPrivate) savePrivateRooms(); else savePublicRooms();
+
+    currentGameRoom = room; currentGameIsPrivate = isPrivate;
+    updateUI(); openGameView();
+    notify(`✅ You joined as number ${number}!`, 'success');
+    if (room.players.length === room.maxPlayers) setTimeout(() => startGame(), 800);
+}
+
+function joinByCode() {
+    const code = (document.getElementById('codeInput').value||'').trim().toUpperCase();
+    if (!code) { notify('Enter a code!','error'); return; }
+    const room = privateRooms.find(r => r.inviteCode === code);
+    if (!room) { notify('❌ Room not found!','error'); return; }
+    document.getElementById('codeInput').value = '';
+    closeOverlay('joinOverlay'); mySlots = []; enterRoom(room, true);
+}
+
+// ══════════════════════════════════════
+//  GAME VIEW
+// ══════════════════════════════════════
+function openGameView() {
+    const room = currentGameRoom; if (!room) return;
+    document.getElementById('gameTitle').textContent = `${fmtUSD(room.nominal)} · ${room.isPrivate?'🔒 Private':'🌐 Public'}`;
+    document.getElementById('gameSubtitle').textContent = `${room.winners} winner${room.winners>1?'s':''} → ${fmtUSD(room.eachPrize)} each (${fmtLocal(room.eachPrize)})`;
+    document.getElementById('spinnerRing').textContent = '🎲';
+    document.getElementById('spinnerRing').classList.remove('spinning');
+    document.getElementById('gameResultCard').innerHTML = '';
+    document.getElementById('gameCloseBtn').style.display = 'none';
+
+    const invRow = document.getElementById('gameInviteRow');
+    if (room.isPrivate && room.inviteCode) {
+        invRow.style.display = 'block';
+        invRow.innerHTML = `
+            <div class="invite-row">
+                <span style="font-size:0.72em;color:var(--muted);">🔑 Code:</span>
+                <span class="invite-code-display">${room.inviteCode}</span>
+                <button class="copy-btn" onclick="copyCode('${room.inviteCode}')">📋</button>
+            </div>
+            <div class="share-row">
+                <button class="share-btn tg" onclick="shareTelegram('${room.inviteCode}',${room.nominal},${room.maxPlayers})">✈️ Telegram</button>
+                <button class="share-btn wa" onclick="shareWhatsApp('${room.inviteCode}',${room.nominal},${room.maxPlayers})">💬 WhatsApp</button>
+                <button class="share-btn lnk" onclick="copyInviteLink('${room.inviteCode}',${room.nominal},${room.maxPlayers})">🔗 Link</button>
+            </div>`;
+    } else { invRow.style.display = 'none'; }
+
+    renderGamePlayers();
+    document.getElementById('gameOverlay').classList.add('active');
+}
+
+function renderGamePlayers() {
+    const room = currentGameRoom; if (!room) return;
+    let html = '';
+    room.players.forEach(p => { html += `<div class="p-tile ${mySlots.includes(p.id)?'me':''}" id="tile_${p.id}">${p.number}</div>`; });
+    for (let i = 0; i < room.maxPlayers - room.players.length; i++) html += `<div class="p-tile" style="opacity:0.3;">·</div>`;
+    document.getElementById('playersTiles').innerHTML = html;
+    const myNums = room.players.filter(p=>mySlots.includes(p.id)).map(p=>p.number);
+    document.getElementById('gameStatusText').textContent =
+        room.players.length < room.maxPlayers
+            ? `Waiting... ${room.players.length}/${room.maxPlayers}${myNums.length?` · Your numbers: ${myNums.join(', ')}`:''}`
+            : `Game starting! Your numbers: ${myNums.join(', ')}`;
+}
+
+// ══════════════════════════════════════
+//  GAME LOGIC
+// ══════════════════════════════════════
+function startGame() {
+    const room = currentGameRoom; if (!room || room.gameActive) return;
+    room.gameActive = true;
+    if (currentGameIsPrivate) savePrivateRooms(); else savePublicRooms();
+    document.getElementById('gameStatusText').textContent = '🎰 Spinning...';
+    const spinner = document.getElementById('spinnerRing');
+    spinner.classList.add('spinning');
+    const nums = room.players.map(p=>p.number);
+    let tick = 0;
+    const iv = setInterval(() => { spinner.textContent = nums[tick++ % nums.length]; }, 80);
+    setTimeout(() => { clearInterval(iv); spinner.classList.remove('spinning'); revealWinners(); }, 3000);
+}
+
+function revealWinners() {
+    const room = currentGameRoom; if (!room) return;
+
+    // Fisher-Yates guaranteed fair shuffle
+    const shuffled = shuffle(room.players);
+    const winnerPlayers = shuffled.slice(0, room.winners);
+
+    document.getElementById('spinnerRing').textContent = winnerPlayers[0].number;
+    winnerPlayers.forEach(w => { const t = document.getElementById('tile_'+w.id); if(t) t.classList.add('winner'); });
+
+    let myWin = 0, myWinNums = [];
+    winnerPlayers.forEach(w => { if(mySlots.includes(w.id)){ myWin += room.eachPrize; myWinNums.push(w.number); } });
+
+    if (myWin > 0) { userData.balanceUSD += myWin; saveUser(); showWinToast(myWin, myWinNums); }
+
+    userData.history.unshift({ date:new Date().toLocaleString('en'), nominal:room.nominal, maxPlayers:room.maxPlayers, pot:room.pot, platformFee:room.platformFee, winners:winnerPlayers.map(w=>({number:w.number,prize:room.eachPrize})), myWin, isPrivate:room.isPrivate });
+    if (userData.history.length > 50) userData.history = userData.history.slice(0,50);
+    saveUser();
+
+    document.getElementById('gameResultCard').innerHTML = `
+        <div class="result-card">
+            <div class="result-title">🎉 Results</div>
+            <div class="result-row">Pool: <strong>${fmtUSD(room.pot)}</strong> (${fmtLocal(room.pot)})</div>
+            <div class="result-row">Platform fee: <strong>${fmtUSD(room.platformFee)}</strong> (${fmtLocal(room.platformFee)})</div>
+            <div style="height:8px;"></div>
+            ${winnerPlayers.map(w=>`<div class="result-row">🎲 Number <strong>${w.number}</strong> → <strong>${fmtUSD(room.eachPrize)}</strong> (${fmtLocal(room.eachPrize)})</div>`).join('')}
+            ${myWin>0 ? `<div class="result-win">✨ YOU WON ${fmtUSD(myWin)}! (${fmtLocal(myWin)}) ✨</div>` : `<div style="color:var(--muted);font-size:0.85em;margin-top:10px;">😢 Better luck next time!</div>`}
+        </div>`;
+    document.getElementById('gameStatusText').textContent = '';
+    document.getElementById('gameCloseBtn').style.display = 'block';
+
+    setTimeout(() => {
+        if (currentGameIsPrivate) { privateRooms = privateRooms.filter(r=>r.id!==room.id); savePrivateRooms(); }
+        else { const i = publicRooms.findIndex(r=>r.id===room.id); if(i!==-1){publicRooms[i]={...publicRooms[i],players:[],gameActive:false}; savePublicRooms();} }
+        updateUI();
+    }, 1000);
+}
+
+function closeGame() { document.getElementById('gameOverlay').classList.remove('active'); currentGameRoom=null; mySlots=[]; updateUI(); }
+
+// ══════════════════════════════════════
+//  RENDER
+// ══════════════════════════════════════
+function renderPublicRooms() {
+    const grid = document.getElementById('publicGrid'); if(!grid) return;
+    let html = '';
+    for (const nominal of PUBLIC_NOMINALS) {
+        html += `<div class="section-label">${fmtUSD(nominal)} <span style="font-size:0.85em;text-transform:none;letter-spacing:0;">(${fmtLocal(nominal)})</span></div>`;
+        for (const players of PLAYER_COUNTS) {
+            const room = publicRooms.find(r=>r.nominal===nominal&&r.maxPlayers===players);
+            if (room) html += buildRoomCard(room, false);
+        }
+    }
+    grid.innerHTML = html;
+}
+
+function renderPrivateRooms() {
+    const grid = document.getElementById('privateGrid'); if(!grid) return;
+    if (privateRooms.length===0) { grid.innerHTML=`<div class="empty-state"><div class="ei">🔒</div>No active private rooms<br><br>Tap ＋ to create one</div>`; return; }
+    grid.innerHTML = privateRooms.map(r=>buildRoomCard(r,true)).join('');
+}
+
+function buildRoomCard(room, isPrivate) {
+    const filled  = room.players.length;
+    const pct     = Math.round((filled/room.maxPlayers)*100);
+    const canJoin = userData && !room.gameActive && filled<room.maxPlayers && userData.balanceUSD>=room.nominal;
+    const myNums  = room.players.filter(p=>p.userId===TG_ID).map(p=>p.number);
+
+    const dots = Array.from({length:room.maxPlayers},(_,i)=>{
+        const p = room.players[i];
+        if (!p) return `<div class="num-dot" style="opacity:0.2;">·</div>`;
+        return `<div class="num-dot ${p.userId===TG_ID?'mine':''}">${p.number}</div>`;
+    }).join('');
+
+    const invHtml = isPrivate && room.inviteCode ? `
+        <div class="invite-row">
+            <span style="font-size:0.7em;color:var(--muted);">🔑</span>
+            <span class="invite-code-display">${room.inviteCode}</span>
+            <button class="copy-btn" onclick="copyCode('${room.inviteCode}')">📋</button>
+        </div>
+        <div class="share-row">
+            <button class="share-btn tg" onclick="shareTelegram('${room.inviteCode}',${room.nominal},${room.maxPlayers})">✈️ Telegram</button>
+            <button class="share-btn wa" onclick="shareWhatsApp('${room.inviteCode}',${room.nominal},${room.maxPlayers})">💬 WhatsApp</button>
+            <button class="share-btn lnk" onclick="copyInviteLink('${room.inviteCode}',${room.nominal},${room.maxPlayers})">🔗 Link</button>
+        </div>` : '';
+
+    let btnLabel = `Join · ${fmtUSD(room.nominal)} (${fmtLocal(room.nominal)})`;
+    if (room.gameActive)            btnLabel = '🎲 Game in progress';
+    else if (filled>=room.maxPlayers) btnLabel = '🔴 Full';
+    else if (myNums.length>0)       btnLabel = `+ Buy another number · ${fmtUSD(room.nominal)}`;
+
+    return `
+        <div class="room-card ${isPrivate?'private-room':''}">
+            <div class="room-top">
+                <div>
+                    <div class="room-usd">${fmtUSD(room.nominal)}</div>
+                    <div class="room-local">${fmtLocal(room.nominal)}</div>
+                </div>
+                <div class="room-badges">
+                    ${isPrivate?'<span class="badge badge-private">Private</span>':''}
+                    <span class="badge badge-players">👥 ${room.maxPlayers}</span>
+                    ${filled>=room.maxPlayers?'<span class="badge badge-full">Full</span>':''}
+                </div>
+            </div>
+            <div class="prize-row">
+                <span class="prize-label">🏆 ${room.winners} winner${room.winners>1?'s':''}</span>
+                <span><span class="prize-val">${fmtUSD(room.eachPrize)}</span> <span class="prize-local">${fmtLocal(room.eachPrize)}</span></span>
+            </div>
+            ${invHtml}
+            <div class="number-dots">${dots}</div>
+            <div class="progress-row">
+                <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+                <span class="progress-text">${filled}/${room.maxPlayers}</span>
+            </div>
+            <button class="join-btn ${isPrivate?'teal':''}" onclick="joinRoom('${room.id}',${isPrivate})" ${!canJoin?'disabled':''}>
+                ${btnLabel}
+            </button>
+        </div>`;
+}
+
+function renderHistory() {
+    const el = document.getElementById('historyGrid'); if(!el) return;
+    if (!userData||userData.history.length===0) { el.innerHTML='<div class="empty-state"><div class="ei">📜</div>No games yet</div>'; return; }
+    el.innerHTML = userData.history.slice(0,20).map(g=>`
+        <div class="history-item">
+            <div class="history-top">
+                <span class="history-date">📅 ${g.date}</span>
+                ${g.myWin>0?`<span class="history-win">+${fmtUSD(g.myWin)} (${fmtLocal(g.myWin)})</span>`:'<span class="history-loss">No win</span>'}
+            </div>
+            <div class="history-detail">
+                ${fmtUSD(g.nominal)} · ${g.maxPlayers} players${g.isPrivate?' 🔒':''}<br>
+                Pool: ${fmtUSD(g.pot)} · Fee: ${fmtUSD(g.platformFee)} (${fmtLocal(g.platformFee)})<br>
+                🏆 ${g.winners.map(w=>`#${w.number} → ${fmtUSD(w.prize)}`).join(', ')}
+            </div>
+        </div>`).join('');
+}
+
+function updateUI() {
+    if (userData) {
+        const u = userData.balanceUSD;
+        document.getElementById('headerUSD').textContent   = fmtUSD(u);
+        document.getElementById('headerLocal').textContent = fmtLocal(u);
+        document.getElementById('cabBalance').textContent  = fmtUSD(u);
+        document.getElementById('cabBalanceLocal').textContent = fmtLocal(u);
+        document.getElementById('cabUserId').textContent   = 'LUCKY_' + userData.id;
+        document.getElementById('currFlag').textContent    = CUR.flag;
+        document.getElementById('currName').textContent    = CUR.code;
+        document.getElementById('currRate').textContent    = `1 USD = ${CUR.rate} ${CUR.code}`;
+    }
+    renderPublicRooms(); renderPrivateRooms(); renderHistory();
+}
+
+// ══════════════════════════════════════
+//  TABS & MODALS
+// ══════════════════════════════════════
+function switchTab(tab, btn) {
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    if(btn) btn.classList.add('active');
+    document.getElementById('panelPublic').style.display  = tab==='public' ?'block':'none';
+    document.getElementById('panelPrivate').style.display = tab==='private'?'block':'none';
+    document.getElementById('panelHistory').style.display = tab==='history'?'block':'none';
+}
+function closeOverlay(id) { document.getElementById(id).classList.remove('active'); }
+function openJoinModal()  { document.getElementById('joinOverlay').classList.add('active'); }
+function openCabinet()    { document.getElementById('cabinetOverlay').classList.add('active'); }
+function overlayClose(e,id){ if(e.target===document.getElementById(id)) closeOverlay(id); }
+
+// ══════════════════════════════════════
+//  SHARE
+// ══════════════════════════════════════
+function shareText(code, nominal, players) {
+    return `🎰 Lucky Number — Join me!\nBet: ${fmtUSD(nominal)} · ${players} players\nRoom code: ${code}\nJoin via: @LuckyNumberBot`;
+}
+function shareTelegram(code,nominal,players)  { window.open(`https://t.me/share/url?url=https://t.me/LuckyNumberBot&text=${encodeURIComponent(shareText(code,nominal,players))}`,'_blank'); }
+function shareWhatsApp(code,nominal,players)  { window.open(`https://wa.me/?text=${encodeURIComponent(shareText(code,nominal,players))}`,'_blank'); }
+function copyInviteLink(code,nominal,players) { navigator.clipboard.writeText(shareText(code,nominal,players)).catch(()=>{}); notify('✅ Link copied!','success'); }
+function copyCode(code) { navigator.clipboard.writeText(code).catch(()=>{}); notify('✅ Code copied!','success'); }
+
+// ══════════════════════════════════════
+//  CABINET
+// ══════════════════════════════════════
+function deposit() {
+    tg.showPopup({ title:'💳 Deposit', message:`Your currency: ${CUR.flag} ${CUR.code}\nRate: 1 USD = ${CUR.rate} ${CUR.code}\n\nPayment integration coming soon.`,
+        buttons:[{type:'default',text:'Demo +$50',id:'demo'},{type:'cancel',text:'Cancel'}]
+    }, (id) => { if(id==='demo'){ userData.balanceUSD+=50; saveUser(); updateUI(); notify('✅ Demo: +$50 added','success'); } });
+}
+function withdraw() { tg.showAlert('💸 To withdraw, contact: @LuckyNumberSupport'); }
+function logout()   { tg.showConfirm('Log out?',(ok)=>{ if(ok){userData=null; closeOverlay('cabinetOverlay'); tg.close();} }); }
+
+// ══════════════════════════════════════
+//  TOASTS
+// ══════════════════════════════════════
+function showWinToast(amount, numbers) {
+    const el = document.getElementById('winToast');
+    el.innerHTML = `🎉 YOU WON!<br>${fmtUSD(amount)}<br><span style="font-size:0.75em;">${fmtLocal(amount)}</span>`;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 3500);
+}
+let notifTimer;
+function notify(msg, type='success') {
+    const el = document.getElementById('notif');
+    el.textContent = msg; el.className = 'notif show ' + type;
+    clearTimeout(notifTimer); notifTimer = setTimeout(()=>el.classList.remove('show'), 2500);
+}
+
+// ══════════════════════════════════════
+//  AUTO-START WATCHER
+// ══════════════════════════════════════
+setInterval(() => {
+    [...publicRooms,...privateRooms].forEach(room => {
+        if (room.players.length===room.maxPlayers && !room.gameActive) {
+            room.gameActive = true;
+            if (room.isPrivate) savePrivateRooms(); else savePublicRooms();
+            if (currentGameRoom?.id===room.id) startGame();
+        }
+    });
+}, 1500);
+
+// ══════════════════════════════════════
+//  BOOT
+// ══════════════════════════════════════
+loadUser(); initPublicRooms(); loadPrivateRooms(); updateUI();
+</script>
+</body>
+</html>
