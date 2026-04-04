@@ -152,6 +152,155 @@ async def telegram_webhook(request: Request):
 
 
 @app.get("/health")
+# ─────────────────────────────────────────────
+#  MINI APP API
+# ─────────────────────────────────────────────
+from rooms import ROOMS, calc_room, fisher_yates, PUBLIC_NOMINALS, PLAYER_COUNTS, PRIVATE_NOMINALS
+import random as _random
+
+@app.get("/api/me")
+async def api_me(telegram_id: int):
+    user = await get_or_create_user(telegram_id)
+    balance = await get_user_balance(telegram_id)
+    return {"telegram_id": telegram_id, "balance": float(balance)}
+
+@app.get("/api/rooms")
+async def api_rooms():
+    public = []
+    for nominal in PUBLIC_NOMINALS:
+        for players in PLAYER_COUNTS:
+            room_id = f"pub_{nominal}_{players}"
+            if room_id not in ROOMS:
+                calc = calc_room(nominal, players)
+                ROOMS[room_id] = {
+                    "id": room_id, "type": "public",
+                    "nominal": nominal, "max_players": players,
+                    "winners": calc["winners"], "each_prize": calc["each_prize"],
+                    "platform_fee": calc["platform_fee"], "pot": calc["pot"],
+                    "players": [], "game_started": False,
+                }
+            r = ROOMS[room_id]
+            public.append({
+                "id": r["id"], "nominal": r["nominal"],
+                "max_players": r["max_players"], "winners": r["winners"],
+                "each_prize": r["each_prize"], "platform_fee": r["platform_fee"],
+                "pot": r["pot"], "player_count": len(r["players"]),
+                "game_started": r["game_started"],
+                "my_numbers": [],
+            })
+    return {"rooms": public}
+
+@app.post("/api/join")
+async def api_join(request: Request):
+    data = await request.json()
+    telegram_id = data.get("telegram_id")
+    room_id = data.get("room_id")
+    room = ROOMS.get(room_id)
+    if not room:
+        return JSONResponse({"ok": False, "error": "Room not found"}, status_code=404)
+    if room["game_started"]:
+        return JSONResponse({"ok": False, "error": "Game already started"}, status_code=400)
+    if len(room["players"]) >= room["max_players"]:
+        return JSONResponse({"ok": False, "error": "Room is full"}, status_code=400)
+    from decimal import Decimal
+    balance = await get_user_balance(telegram_id)
+    if balance < room["nominal"]:
+        return JSONResponse({"ok": False, "error": "Insufficient balance"}, status_code=400)
+    taken = [p["number"] for p in room["players"]]
+    available = [n for n in range(1, room["max_players"] + 1) if n not in taken]
+    number = _random.choice(available)
+    tx_id = f"bet_{room_id}_{telegram_id}_{number}"
+    from database import debit_user_balance, is_duplicate_tx
+    if await is_duplicate_tx(tx_id):
+        return JSONResponse({"ok": False, "error": "Already joined"}, status_code=400)
+    success = await debit_user_balance(telegram_id, Decimal(str(room["nominal"])), tx_id)
+    if not success:
+        return JSONResponse({"ok": False, "error": "Payment failed"}, status_code=400)
+    room["players"].append({"telegram_id": telegram_id, "number": number})
+    new_balance = await get_user_balance(telegram_id)
+    if len(room["players"]) == room["max_players"] and not room["game_started"]:
+        import asyncio
+        from rooms import run_game_draw
+        asyncio.create_task(run_game_draw(room_id, bot_app.bot))
+    return {"ok": True, "number": number, "balance": float(new_balance),
+            "player_count": len(room["players"])}
+
+@app.post("/api/create-private")
+async def api_create_private(request: Request):
+    data = await request.json()
+    telegram_id = data.get("telegram_id")
+    nominal = data.get("nominal")
+    players = data.get("players")
+    from decimal import Decimal
+    balance = await get_user_balance(telegram_id)
+    if balance < nominal:
+        return JSONResponse({"ok": False, "error": "Insufficient balance"}, status_code=400)
+    calc = calc_room(nominal, players)
+    import random as rnd
+    code = ''.join(rnd.choices('ABCDEFGHJKLMNPQRSTUVWXYZ23456789', k=6))
+    room_id = f"prv_{code}"
+    tx_id = f"bet_{room_id}_{telegram_id}"
+    from database import debit_user_balance
+    success = await debit_user_balance(telegram_id, Decimal(str(nominal)), tx_id)
+    if not success:
+        return JSONResponse({"ok": False, "error": "Payment failed"}, status_code=400)
+    ROOMS[room_id] = {
+        "id": room_id, "type": "private",
+        "nominal": nominal, "max_players": players,
+        "winners": calc["winners"], "each_prize": calc["each_prize"],
+        "platform_fee": calc["platform_fee"], "pot": calc["pot"],
+        "invite_code": code, "creator_id": telegram_id,
+        "players": [{"telegram_id": telegram_id, "number": 1}],
+        "game_started": False,
+    }
+    new_balance = await get_user_balance(telegram_id)
+    return {"ok": True, "invite_code": code, "room_id": room_id, "balance": float(new_balance)}
+
+@app.post("/api/join-private")
+async def api_join_private(request: Request):
+    data = await request.json()
+    telegram_id = data.get("telegram_id")
+    code = data.get("invite_code", "").upper()
+    room = next((r for r in ROOMS.values() if r.get("invite_code") == code), None)
+    if not room:
+        return JSONResponse({"ok": False, "error": "Room not found"}, status_code=404)
+    if room["game_started"] or len(room["players"]) >= room["max_players"]:
+        return JSONResponse({"ok": False, "error": "Room is full"}, status_code=400)
+    from decimal import Decimal
+    balance = await get_user_balance(telegram_id)
+    if balance < room["nominal"]:
+        return JSONResponse({"ok": False, "error": "Insufficient balance"}, status_code=400)
+    taken = [p["number"] for p in room["players"]]
+    available = [n for n in range(1, room["max_players"] + 1) if n not in taken]
+    number = _random.choice(available)
+    tx_id = f"bet_{room['id']}_{telegram_id}_{number}"
+    from database import debit_user_balance
+    success = await debit_user_balance(telegram_id, Decimal(str(room["nominal"])), tx_id)
+    if not success:
+        return JSONResponse({"ok": False, "error": "Payment failed"}, status_code=400)
+    room["players"].append({"telegram_id": telegram_id, "number": number})
+    new_balance = await get_user_balance(telegram_id)
+    if len(room["players"]) == room["max_players"]:
+        import asyncio
+        from rooms import run_game_draw
+        asyncio.create_task(run_game_draw(room["id"], bot_app.bot))
+    return {"ok": True, "number": number, "balance": float(new_balance),
+            "invite_code": code, "player_count": len(room["players"])}
+
+@app.get("/api/private-rooms")
+async def api_private_rooms(telegram_id: int):
+    rooms = []
+    for r in ROOMS.values():
+        if r.get("type") == "private":
+            is_member = any(p["telegram_id"] == telegram_id for p in r["players"])
+            if is_member or r.get("creator_id") == telegram_id:
+                rooms.append({
+                    "id": r["id"], "nominal": r["nominal"],
+                    "max_players": r["max_players"], "winners": r["winners"],
+                    "each_prize": r["each_prize"], "invite_code": r.get("invite_code"),
+                    "player_count": len(r["players"]), "game_started": r["game_started"],
+                })
+    return {"rooms": rooms}
 async def health():
     return {"status": "ok", "service": "Lucky Number Bot"}
 
