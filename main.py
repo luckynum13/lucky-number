@@ -21,7 +21,8 @@ from telegram.ext import (
 
 from database import init_db, get_or_create_user, get_user_balance
 from payments import setup_payment_handlers
-from rooms import setup_room_handlers
+from rooms import setup_room_handlers, ROOMS, calc_room, PUBLIC_NOMINALS, PLAYER_COUNTS, PRIVATE_NOMINALS
+import random as _random
 
 # ─────────────────────────────────────────────
 #  LOGGING
@@ -155,7 +156,6 @@ async def telegram_webhook(request: Request):
 # ─────────────────────────────────────────────
 #  MINI APP API
 # ─────────────────────────────────────────────
-from rooms import ROOMS, calc_room, fisher_yates, PUBLIC_NOMINALS, PLAYER_COUNTS, PRIVATE_NOMINALS
 import random as _random
 @app.get("/api/me")
 async def api_me(telegram_id: int):
