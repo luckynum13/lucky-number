@@ -1,0 +1,16 @@
+# Защита секретных данных — эти файлы НЕ попадут на GitHub
+.env
+*.db
+*.sqlite
+data/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+venv/
+.venv/
+
+# Fly.io
+.fly/
