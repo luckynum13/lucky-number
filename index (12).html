@@ -1,0 +1,1601 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#05080F">
+<title>Lucky Number</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+
+:root{
+  --gold:#C8A84B;
+  --gold-bright:#E8C96A;
+  --gold-dim:rgba(200,168,75,0.12);
+  --gold-glow:rgba(200,168,75,0.25);
+  --teal:#00C4A0;
+  --teal-dim:rgba(0,196,160,0.12);
+  --bg:#05080F;
+  --bg1:#080D18;
+  --bg2:#0C1220;
+  --bg3:#111829;
+  --bg4:#162035;
+  --border:rgba(255,255,255,0.06);
+  --border-gold:rgba(200,168,75,0.2);
+  --text:#F0F2F8;
+  --text2:#8892A8;
+  --text3:#4A5568;
+  --red:#FF4D6A;
+  --red-dim:rgba(255,77,106,0.12);
+}
+
+body{
+  font-family:'Outfit',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+  /* Bottom nav = 62px + safe area */
+  padding-bottom:calc(72px + env(safe-area-inset-bottom,12px));
+}
+
+/* AMBIENT BACKGROUND */
+body::before{
+  content:'';
+  position:fixed;
+  top:-40%;
+  left:-20%;
+  width:70%;
+  height:70%;
+  background:radial-gradient(ellipse,rgba(200,168,75,0.04) 0%,transparent 70%);
+  pointer-events:none;
+  z-index:0;
+}
+body::after{
+  content:'';
+  position:fixed;
+  bottom:-30%;
+  right:-20%;
+  width:60%;
+  height:60%;
+  background:radial-gradient(ellipse,rgba(0,196,160,0.04) 0%,transparent 70%);
+  pointer-events:none;
+  z-index:0;
+}
+
+.wrap{
+  max-width:480px;
+  margin:0 auto;
+  padding:0 14px;
+  position:relative;
+  z-index:1;
+}
+
+/* ══════════════════════════════
+   HEADER
+══════════════════════════════ */
+.header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:10px 0 8px;
+  margin-bottom:2px;
+}
+
+.logo-wrap{}
+.logo-name{
+  font-size:20px;
+  font-weight:800;
+  letter-spacing:-0.5px;
+  background:linear-gradient(135deg,var(--gold-bright),var(--gold));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  line-height:1;
+}
+.logo-tag{
+  font-size:10px;
+  font-weight:400;
+  color:var(--text3);
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  margin-top:3px;
+}
+
+.header-right{display:flex;align-items:center;gap:8px}
+
+.balance-chip{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  background:var(--bg2);
+  border:1px solid var(--border-gold);
+  border-radius:14px;
+  padding:7px 12px;
+  cursor:pointer;
+  transition:all 0.2s;
+  position:relative;
+  overflow:hidden;
+}
+.balance-chip::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(135deg,var(--gold-dim),transparent);
+  opacity:0;
+  transition:opacity 0.2s;
+}
+.balance-chip:active::before{opacity:1}
+.bal-usd{
+  font-size:15px;
+  font-weight:700;
+  color:var(--gold-bright);
+  font-family:'DM Mono',monospace;
+  line-height:1;
+}
+.bal-local{
+  font-size:9px;
+  color:var(--text3);
+  font-family:'DM Mono',monospace;
+  margin-top:2px;
+}
+
+.avatar-btn{
+  width:36px;height:36px;border-radius:12px;
+  background:var(--bg2);
+  border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  font-size:16px;
+  transition:border-color 0.2s;
+}
+.avatar-btn:active{border-color:var(--gold)}
+
+/* ══════════════════════════════
+   BOTTOM NAV (thumb-friendly)
+══════════════════════════════ */
+.bottom-nav{
+  position:fixed;
+  bottom:0;left:0;right:0;
+  z-index:200;
+  background:var(--bg2);
+  border-top:1px solid var(--border);
+  display:flex;
+  align-items:stretch;
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  /* GPU layer - no repaints */
+  will-change:transform;
+}
+
+.nav-btn{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:3px;
+  padding:10px 4px 12px;
+  background:none;
+  border:none;
+  cursor:pointer;
+  color:var(--text3);
+  font-family:'Outfit',sans-serif;
+  font-size:9px;
+  font-weight:600;
+  letter-spacing:0.3px;
+  text-transform:uppercase;
+  transition:color 0.15s;
+  /* Minimum 48px touch target */
+  min-height:58px;
+  -webkit-tap-highlight-color:transparent;
+}
+.nav-btn.active{color:var(--gold)}
+.nav-btn:active{opacity:0.7}
+
+.nav-icon{
+  font-size:18px;
+  line-height:1;
+  margin-bottom:1px;
+}
+
+/* Center create button - primary CTA */
+.nav-btn-create{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:3px;
+  padding:6px 4px 12px;
+  background:none;
+  border:none;
+  cursor:pointer;
+  font-family:'Outfit',sans-serif;
+  font-size:9px;
+  font-weight:700;
+  letter-spacing:0.3px;
+  text-transform:uppercase;
+  color:var(--gold);
+  min-height:58px;
+  -webkit-tap-highlight-color:transparent;
+  position:relative;
+}
+.nav-create-icon{
+  width:42px;height:42px;
+  border-radius:14px;
+  background:linear-gradient(135deg,var(--gold),var(--gold-bright));
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;color:#05080F;font-weight:300;
+  box-shadow:0 4px 16px var(--gold-glow);
+  margin-bottom:4px;
+  line-height:1;
+  transition:transform 0.15s,box-shadow 0.15s;
+}
+.nav-btn-create:active .nav-create-icon{
+  transform:scale(0.92);
+  box-shadow:0 2px 8px var(--gold-glow);
+}
+
+/* Hide old top tabs */
+.tabs{display:none}
+
+/* ══════════════════════════════
+   SECTION LABEL
+══════════════════════════════ */
+.section-label{
+  font-size:10px;
+  font-weight:700;
+  color:var(--text3);
+  letter-spacing:2px;
+  text-transform:uppercase;
+  margin:14px 0 10px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.section-label::after{
+  content:'';
+  flex:1;
+  height:1px;
+  background:linear-gradient(to right,var(--border),transparent);
+}
+
+/* ══════════════════════════════
+   ROOM CARDS
+══════════════════════════════ */
+.rooms-grid{display:flex;flex-direction:column;gap:12px}
+
+.room-card{
+  background:var(--bg1);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:16px;
+  transition:border-color 0.2s;
+  position:relative;
+  overflow:hidden;
+}
+.room-card::before{
+  content:'';
+  position:absolute;
+  top:0;left:0;right:0;
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent);
+}
+.room-card.private-room{
+  border-color:rgba(0,196,160,0.2);
+  background:linear-gradient(145deg,rgba(0,196,160,0.04),var(--bg1));
+}
+.room-card.private-room::before{
+  background:linear-gradient(90deg,transparent,rgba(0,196,160,0.15),transparent);
+}
+
+.room-top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  margin-bottom:12px;
+}
+.room-amount-wrap{}
+.room-usd{
+  font-size:28px;
+  font-weight:800;
+  color:var(--gold-bright);
+  font-family:'DM Mono',monospace;
+  line-height:1;
+  letter-spacing:-1px;
+}
+.room-local{
+  font-size:11px;
+  color:var(--text3);
+  font-family:'DM Mono',monospace;
+  margin-top:3px;
+}
+.room-badges{
+  display:flex;
+  gap:5px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+  align-items:flex-start;
+}
+.badge{
+  font-size:9px;
+  font-weight:700;
+  padding:4px 8px;
+  border-radius:8px;
+  border:1px solid;
+  letter-spacing:0.5px;
+}
+.badge-players{color:var(--teal);border-color:rgba(0,196,160,0.3);background:var(--teal-dim)}
+.badge-private{color:var(--gold);border-color:var(--border-gold);background:var(--gold-dim)}
+.badge-full{color:var(--red);border-color:rgba(255,77,106,0.3);background:var(--red-dim)}
+
+/* Prize row */
+.prize-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  background:var(--bg3);
+  border:1px solid var(--border);
+  padding:9px 12px;
+  border-radius:12px;
+  margin-bottom:12px;
+}
+.prize-label{font-size:11px;color:var(--text2)}
+.prize-right{display:flex;align-items:baseline;gap:5px}
+.prize-val{font-size:13px;font-weight:700;color:var(--gold);font-family:'DM Mono',monospace}
+.prize-local{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace}
+
+/* Number dots */
+.number-dots{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-bottom:12px;
+  min-height:30px;
+}
+.num-dot{
+  width:28px;height:28px;
+  border-radius:50%;
+  background:var(--bg3);
+  border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;
+  color:var(--text3);
+  font-family:'DM Mono',monospace;
+  transition:all 0.2s;
+}
+.num-dot.filled{
+  background:var(--gold-dim);
+  border-color:var(--border-gold);
+  color:var(--gold);
+}
+.num-dot.mine{
+  background:var(--gold);
+  border-color:var(--gold-bright);
+  color:var(--bg);
+  box-shadow:0 0 12px var(--gold-glow);
+}
+
+/* Progress */
+.progress-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.progress-track{
+  flex:1;height:3px;
+  background:var(--bg3);
+  border-radius:99px;
+  overflow:hidden;
+}
+.progress-fill{
+  height:100%;
+  background:linear-gradient(90deg,var(--teal),var(--gold));
+  border-radius:99px;
+  transition:width 0.5s ease;
+}
+.progress-text{
+  font-size:10px;color:var(--text3);
+  font-family:'DM Mono',monospace;
+  white-space:nowrap;
+}
+
+/* Invite row */
+.invite-row{
+  display:flex;align-items:center;gap:8px;
+  background:var(--bg3);
+  border:1px solid var(--border);
+  padding:8px 12px;
+  border-radius:12px;
+  margin-bottom:8px;
+}
+.invite-code-display{
+  font-family:'DM Mono',monospace;
+  font-size:13px;
+  letter-spacing:4px;
+  color:var(--teal);
+  flex:1;font-weight:500;
+}
+.copy-btn{
+  background:none;border:none;
+  color:var(--text3);cursor:pointer;
+  font-size:14px;padding:2px;
+  transition:color 0.2s;
+}
+.copy-btn:active{color:var(--gold)}
+
+.share-row{display:flex;gap:6px;margin-bottom:12px}
+.share-btn{
+  flex:1;padding:8px 4px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:var(--bg3);
+  color:var(--text2);
+  font-family:'Outfit',sans-serif;
+  font-size:10px;font-weight:600;
+  cursor:pointer;text-align:center;
+  transition:all 0.15s;
+}
+.share-btn.tg{border-color:rgba(0,196,160,0.25);color:var(--teal);background:var(--teal-dim)}
+.share-btn.wa{border-color:rgba(87,196,100,0.25);color:#57C464;background:rgba(87,196,100,0.08)}
+.share-btn.lnk{color:var(--text3)}
+
+/* Join button - large thumb-friendly touch target */
+.join-btn{
+  width:100%;
+  padding:15px;
+  border:none;
+  border-radius:14px;
+  background:linear-gradient(135deg,var(--gold),var(--gold-bright));
+  color:#05080F;
+  font-family:'Outfit',sans-serif;
+  font-size:14px;font-weight:700;
+  cursor:pointer;
+  transition:all 0.2s;
+  letter-spacing:0.2px;
+  position:relative;
+  overflow:hidden;
+  /* Minimum 52px touch target */
+  min-height:52px;
+}
+.join-btn::after{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,0.15),transparent);
+  opacity:0;
+  transition:opacity 0.2s;
+}
+.join-btn:active{transform:scale(0.98);opacity:0.9}
+.join-btn:active::after{opacity:1}
+.join-btn:disabled{
+  opacity:0.3;cursor:not-allowed;
+  background:var(--bg3);color:var(--text3);
+  transform:none;box-shadow:none;
+}
+.join-btn.teal{background:linear-gradient(135deg,var(--teal),#00A888)}
+
+/* FAB removed - integrated into bottom nav */
+
+/* ══════════════════════════════
+   BOTTOM SHEET MODALS
+══════════════════════════════ */
+.overlay{
+  display:none;
+  position:fixed;inset:0;
+  background:rgba(5,8,15,0.85);
+  backdrop-filter:blur(8px);
+  z-index:500;
+  align-items:flex-end;
+  justify-content:center;
+}
+.overlay.active{display:flex}
+
+.sheet{
+  background:var(--bg2);
+  border-radius:24px 24px 0 0;
+  border:1px solid var(--border);
+  border-bottom:none;
+  padding:0 20px calc(28px + env(safe-area-inset-bottom,0px));
+  width:100%;max-width:480px;
+  max-height:92vh;overflow-y:auto;
+  animation:slideUp 0.35s cubic-bezier(0.32,0.72,0,1);
+}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+
+.sheet-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 0 16px;
+  position:sticky;top:0;
+  background:var(--bg2);
+  z-index:10;
+}
+.sheet-handle{
+  width:36px;height:4px;
+  background:var(--bg4);
+  border-radius:99px;
+  position:absolute;
+  top:12px;left:50%;
+  transform:translateX(-50%);
+}
+.sheet-title{
+  font-size:18px;font-weight:700;
+  color:var(--text);
+  padding-top:8px;
+}
+.sheet-close{
+  width:32px;height:32px;
+  border-radius:10px;
+  background:var(--bg3);
+  border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  font-size:14px;color:var(--text2);
+  margin-top:8px;
+}
+
+/* Form elements */
+.form-label{
+  font-size:10px;font-weight:700;
+  color:var(--text3);
+  letter-spacing:2px;
+  text-transform:uppercase;
+  margin-bottom:10px;
+  display:block;
+}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.chip{
+  padding:10px 16px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:var(--bg3);
+  color:var(--text2);
+  font-family:'Outfit',sans-serif;
+  font-size:13px;font-weight:600;
+  cursor:pointer;
+  transition:all 0.15s;
+  min-height:44px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.chip.active{
+  background:var(--gold-dim);
+  border-color:var(--border-gold);
+  color:var(--gold);
+}
+
+/* Preview box */
+.preview-box{
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:16px;
+  margin:16px 0;
+}
+.preview-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:5px 0;
+}
+.preview-key{font-size:12px;color:var(--text3)}
+.preview-val{
+  font-size:13px;font-weight:600;
+  font-family:'DM Mono',monospace;
+}
+.preview-val.gold{color:var(--gold)}
+.preview-val.teal{color:var(--teal)}
+.preview-val.red{color:var(--red)}
+.preview-divider{height:1px;background:var(--border);margin:8px 0}
+
+/* Code input */
+.code-input{
+  width:100%;
+  padding:16px;
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:14px;
+  color:var(--text);
+  font-family:'DM Mono',monospace;
+  font-size:18px;
+  letter-spacing:6px;
+  text-transform:uppercase;
+  text-align:center;
+  margin-bottom:16px;
+  outline:none;
+  transition:border-color 0.2s;
+}
+.code-input:focus{border-color:var(--gold)}
+.code-input::placeholder{color:var(--text3);letter-spacing:2px;font-size:13px}
+
+/* ══════════════════════════════
+   CABINET
+══════════════════════════════ */
+.cabinet-body{text-align:center;padding:8px 0}
+.cabinet-icon{
+  width:64px;height:64px;
+  border-radius:20px;
+  background:linear-gradient(135deg,var(--gold-dim),transparent);
+  border:1px solid var(--border-gold);
+  display:flex;align-items:center;justify-content:center;
+  font-size:28px;
+  margin:0 auto 12px;
+}
+.cabinet-id{
+  font-family:'DM Mono',monospace;
+  font-size:11px;color:var(--text3);
+  margin-bottom:20px;
+  letter-spacing:1px;
+}
+.cabinet-balance{
+  font-size:36px;font-weight:800;
+  color:var(--gold-bright);
+  font-family:'DM Mono',monospace;
+  letter-spacing:-1px;
+  line-height:1;
+}
+.cabinet-balance-local{
+  font-size:14px;color:var(--text3);
+  font-family:'DM Mono',monospace;
+  margin-top:6px;margin-bottom:8px;
+}
+.cabinet-balance-label{font-size:11px;color:var(--text3);margin-bottom:24px}
+
+.currency-row{
+  display:flex;align-items:center;gap:10px;
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:12px 16px;
+  margin-bottom:20px;
+  text-align:left;
+}
+.currency-flag{font-size:20px}
+.currency-info{}
+.currency-name{font-size:13px;font-weight:600;color:var(--text)}
+.currency-rate{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;margin-top:1px}
+
+.action-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.action-btn{
+  padding:14px;
+  border-radius:14px;
+  border:1px solid var(--border);
+  background:var(--bg3);
+  color:var(--text);
+  font-family:'Outfit',sans-serif;
+  font-size:13px;font-weight:600;
+  cursor:pointer;
+  transition:all 0.15s;
+  text-align:center;
+  min-height:52px;
+}
+.action-btn:active{background:var(--bg4)}
+.action-btn.primary{
+  background:var(--gold-dim);
+  border-color:var(--border-gold);
+  color:var(--gold);
+}
+.action-btn.danger{
+  background:var(--red-dim);
+  border-color:rgba(255,77,106,0.25);
+  color:var(--red);
+  grid-column:1/-1;
+}
+.support-link{
+  margin-top:20px;
+  font-size:11px;color:var(--text3);
+  letter-spacing:0.3px;
+}
+
+/* ══════════════════════════════
+   GAME OVERLAY
+══════════════════════════════ */
+.game-overlay{
+  display:none;
+  position:fixed;inset:0;
+  background:rgba(5,8,15,0.97);
+  z-index:900;
+  align-items:center;justify-content:center;
+  padding:20px;
+  flex-direction:column;
+}
+.game-overlay.active{display:flex}
+
+.game-box{
+  background:var(--bg1);
+  border:1px solid var(--border);
+  border-radius:24px;
+  padding:24px;
+  width:100%;max-width:400px;
+  max-height:90vh;overflow-y:auto;
+  position:relative;
+}
+.game-box::before{
+  content:'';
+  position:absolute;
+  top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(200,168,75,0.3),transparent);
+}
+
+.game-header{margin-bottom:6px}
+.game-title{font-size:15px;font-weight:700;color:var(--text)}
+.game-subtitle{font-size:11px;color:var(--text3);margin-top:2px}
+
+/* Spinner */
+.spinner-wrap{
+  display:flex;align-items:center;justify-content:center;
+  margin:24px 0;
+  position:relative;
+}
+.spinner-outer{
+  width:110px;height:110px;border-radius:50%;
+  border:1.5px solid var(--border-gold);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;
+}
+.spinner-outer::before{
+  content:'';
+  position:absolute;inset:-4px;
+  border-radius:50%;
+  border:1px solid rgba(200,168,75,0.1);
+}
+.spinner-ring{
+  width:90px;height:90px;border-radius:50%;
+  border:2px solid transparent;
+  border-top-color:var(--gold);
+  display:flex;align-items:center;justify-content:center;
+  font-size:26px;font-weight:800;
+  font-family:'DM Mono',monospace;
+  color:var(--gold-bright);
+}
+.spinner-ring.spinning{animation:spin 0.4s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Player tiles */
+.players-wrap{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:6px;margin:12px 0;
+}
+.p-tile{
+  aspect-ratio:1;border-radius:10px;
+  background:var(--bg3);
+  border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;
+  font-family:'DM Mono',monospace;
+  color:var(--text3);
+  transition:all 0.3s;
+}
+.p-tile.me{
+  color:var(--gold);
+  border-color:var(--border-gold);
+  background:var(--gold-dim);
+}
+.p-tile.winner{
+  color:var(--bg);
+  background:linear-gradient(135deg,var(--gold),var(--gold-bright));
+  border-color:var(--gold);
+  animation:winPop 0.5s cubic-bezier(0.34,1.56,0.64,1);
+  box-shadow:0 0 20px var(--gold-glow);
+}
+@keyframes winPop{0%{transform:scale(0.6);opacity:0}100%{transform:scale(1);opacity:1}}
+
+.game-status{
+  font-size:12px;color:var(--text3);
+  text-align:center;margin:8px 0;
+  line-height:1.5;
+}
+
+/* Result card */
+.result-card{
+  background:linear-gradient(145deg,rgba(200,168,75,0.1),rgba(200,168,75,0.04));
+  border:1px solid var(--border-gold);
+  border-radius:16px;
+  padding:18px;
+  text-align:center;
+  margin:12px 0;
+  position:relative;
+  overflow:hidden;
+}
+.result-card::before{
+  content:'';
+  position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold-glow),transparent);
+}
+.result-title{
+  font-size:13px;font-weight:700;
+  color:var(--gold);margin-bottom:10px;
+}
+.result-row{font-size:12px;color:var(--text3);padding:2px 0}
+.result-row strong{color:var(--text)}
+.result-win{
+  font-size:20px;font-weight:800;
+  color:var(--gold-bright);
+  margin-top:12px;
+  font-family:'DM Mono',monospace;
+  letter-spacing:-0.5px;
+}
+
+/* ══════════════════════════════
+   HISTORY
+══════════════════════════════ */
+.history-item{
+  background:var(--bg1);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:14px;
+  margin-bottom:10px;
+  transition:border-color 0.2s;
+}
+.history-top{
+  display:flex;justify-content:space-between;
+  align-items:flex-start;
+  margin-bottom:8px;
+}
+.history-date{font-size:11px;color:var(--text3)}
+.history-win{
+  font-size:13px;font-weight:700;
+  color:var(--gold);
+  font-family:'DM Mono',monospace;
+}
+.history-loss{font-size:12px;color:var(--text3)}
+.history-detail{font-size:11px;color:var(--text3);line-height:1.7}
+
+/* ══════════════════════════════
+   WIN TOAST
+══════════════════════════════ */
+.toast{
+  position:fixed;top:50%;left:50%;
+  transform:translate(-50%,-50%) scale(0);
+  z-index:9999;
+  background:linear-gradient(135deg,var(--gold),var(--gold-bright));
+  color:var(--bg);
+  padding:20px 32px;
+  border-radius:24px;
+  font-size:15px;font-weight:800;
+  text-align:center;
+  box-shadow:0 0 60px var(--gold-glow),0 0 0 1px rgba(255,255,255,0.1);
+  pointer-events:none;
+  transition:transform 0.4s cubic-bezier(0.34,1.56,0.64,1),opacity 0.3s;
+  opacity:0;
+  max-width:280px;
+  width:90%;
+}
+.toast.show{transform:translate(-50%,-50%) scale(1);opacity:1}
+.toast-amount{font-size:28px;font-weight:900;font-family:'DM Mono',monospace;letter-spacing:-1px;margin:4px 0}
+.toast-local{font-size:13px;opacity:0.8;font-family:'DM Mono',monospace}
+
+/* Notification - above bottom nav */
+.notif{
+  position:fixed;
+  bottom:calc(68px + env(safe-area-inset-bottom,0px));
+  left:16px;right:16px;
+  max-width:448px;margin:0 auto;
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:12px 16px;
+  font-size:13px;font-weight:600;
+  z-index:8000;
+  transform:translateY(12px);opacity:0;
+  transition:all 0.25s;
+  pointer-events:none;
+}
+.notif.show{transform:translateY(0);opacity:1}
+.notif.success{border-color:rgba(0,196,160,0.35);color:var(--teal)}
+.notif.error{border-color:rgba(255,77,106,0.35);color:var(--red)}
+
+/* Empty state */
+.empty-state{
+  text-align:center;
+  padding:48px 20px;
+  color:var(--text3);
+}
+.empty-icon{
+  font-size:40px;margin-bottom:14px;
+  filter:grayscale(0.5);
+}
+.empty-title{font-size:15px;font-weight:600;color:var(--text2);margin-bottom:6px}
+.empty-sub{font-size:12px;line-height:1.6}
+
+/* Divider */
+.divider{height:1px;background:var(--border);margin:4px 0}
+
+@media(max-width:360px){
+  .players-wrap{grid-template-columns:repeat(4,1fr)}
+}
+
+/* Shimmer animation for loading */
+@keyframes shimmer{
+  0%{background-position:-200% 0}
+  100%{background-position:200% 0}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo-wrap">
+      <div class="logo-name">🎰 Lucky Number</div>
+      <div class="logo-tag" style="text-transform:none;letter-spacing:0.5px">Играй и выигрывай 🎰</div>
+    </div>
+    <div class="header-right">
+      <div class="balance-chip" onclick="openCabinet()">
+        <span class="bal-usd" id="headerUSD">$0.00</span>
+        <span class="bal-local" id="headerLocal">—</span>
+      </div>
+      <div class="avatar-btn" onclick="openCabinet()">👤</div>
+    </div>
+  </div>
+
+  <!-- TABS (hidden, controlled by bottom nav) -->
+  <div class="tabs" style="display:none">
+    <button class="tab active" onclick="switchTab('public',this)">🎲 Public</button>
+    <button class="tab" onclick="switchTab('private',this)">🔒 Private</button>
+    <button class="tab" onclick="openJoinModal()">🔑 Code</button>
+    <button class="tab" onclick="switchTab('history',this)">📜 History</button>
+  </div>
+
+  <!-- PUBLIC TAB -->
+  <div id="panelPublic">
+    <div class="rooms-grid" id="publicGrid"></div>
+  </div>
+
+  <!-- PRIVATE TAB -->
+  <div id="panelPrivate" style="display:none">
+    <div class="rooms-grid" id="privateGrid"></div>
+  </div>
+
+  <!-- HISTORY TAB -->
+  <div id="panelHistory" style="display:none">
+    <div class="section-label">Последние игры</div>
+    <div id="historyGrid"></div>
+  </div>
+
+</div>
+
+<!-- BOTTOM NAV - thumb zone, primary interactions -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" id="navPublic" onclick="navSwitch('public')">
+    <span class="nav-icon">🎲</span>
+    Общие
+  </button>
+  <button class="nav-btn" id="navPrivate" onclick="navSwitch('private')">
+    <span class="nav-icon">🔒</span>
+    Мои
+  </button>
+  <button class="nav-btn-create" onclick="openCreateModal()">
+    <div class="nav-create-icon">＋</div>
+    Создать
+  </button>
+  <button class="nav-btn" id="navCode" onclick="openJoinModal()">
+    <span class="nav-icon">🔑</span>
+    По коду
+  </button>
+  <button class="nav-btn" id="navHistory" onclick="navSwitch('history')">
+    <span class="nav-icon">📜</span>
+    История
+  </button>
+</nav>
+
+<!-- ══ CREATE ROOM ══ -->
+<div class="overlay" id="createOverlay" onclick="overlayClose(event,'createOverlay')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <div class="sheet-title">Создать комнату</div>
+      <div class="sheet-close" onclick="closeOverlay('createOverlay')">✕</div>
+    </div>
+
+    <label class="form-label">Сумма ставки</label>
+    <div class="chips" id="nominalChips"></div>
+
+    <label class="form-label">Количество игроков</label>
+    <div class="chips" id="playersChips">
+      <button class="chip active" data-val="3" onclick="selectPlayers(this)">3</button>
+      <button class="chip" data-val="5" onclick="selectPlayers(this)">5</button>
+      <button class="chip" data-val="7" onclick="selectPlayers(this)">7</button>
+      <button class="chip" data-val="10" onclick="selectPlayers(this)">10</button>
+    </div>
+
+    <label class="form-label">Тип комнаты</label>
+    <div class="chips" id="typeChips">
+      <button class="chip active" data-val="public" onclick="selectType(this)">🌐 Общая</button>
+      <button class="chip" data-val="private" onclick="selectType(this)">🔒 Приватная</button>
+    </div>
+
+    <div class="preview-box" id="createPreview"></div>
+
+    <button class="join-btn" onclick="createRoom()" style="margin-bottom:10px">🚀 Создать и войти</button>
+    <button class="join-btn" style="background:var(--bg3);color:var(--text3)" onclick="closeOverlay('createOverlay')">Отмена</button>
+  </div>
+</div>
+
+<!-- ══ JOIN BY CODE ══ -->
+<div class="overlay" id="joinOverlay" onclick="overlayClose(event,'joinOverlay')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <div class="sheet-title">Войти по коду</div>
+      <div class="sheet-close" onclick="closeOverlay('joinOverlay')">✕</div>
+    </div>
+    <p style="font-size:13px;color:var(--text3);margin-bottom:20px;line-height:1.6">Введите 6-значный код приглашения от друга</p>
+    <input class="code-input" id="codeInput" placeholder="КОД КОМНАТЫ" maxlength="6" autocomplete="off">
+    <button class="join-btn teal" onclick="joinByCode()" style="margin-bottom:10px">🔓 Войти в комнату</button>
+    <button class="join-btn" style="background:var(--bg3);color:var(--text3)" onclick="closeOverlay('joinOverlay')">Отмена</button>
+  </div>
+</div>
+
+<!-- ══ CABINET ══ -->
+<div class="overlay" id="cabinetOverlay" onclick="overlayClose(event,'cabinetOverlay')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <div class="sheet-title">Мой кабинет</div>
+      <div class="sheet-close" onclick="closeOverlay('cabinetOverlay')">✕</div>
+    </div>
+    <div class="cabinet-body">
+      <div class="cabinet-icon">🎰</div>
+      <div class="cabinet-id" id="cabUserId">LUCKY_—</div>
+      <div class="cabinet-balance" id="cabBalance">0 сўм</div>
+      <div class="cabinet-balance-local" id="cabBalanceLocal">—</div>
+      <div class="cabinet-balance-label">Баланс</div>
+
+      <div class="currency-row">
+        <span class="currency-flag" id="currFlag">🇺🇿</span>
+        <div class="currency-info">
+          <div class="currency-name" id="currName">UZS</div>
+          <div class="currency-rate" id="currRate">1 $ = 12 800 сўм</div>
+        </div>
+      </div>
+
+      <div class="action-grid">
+        <button class="action-btn primary" onclick="deposit()">💳 Пополнить</button>
+        <button class="action-btn primary" onclick="withdraw()">💸 Вывести</button>
+        <button class="action-btn danger" onclick="logout()">🚪 Выйти</button>
+      </div>
+      <div class="support-link">Поддержка: @LuckyNumberSupport</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ GAME OVERLAY ══ -->
+<div class="game-overlay" id="gameOverlay">
+  <div class="game-box">
+    <div class="game-header">
+      <div class="game-title" id="gameTitle"></div>
+      <div class="game-subtitle" id="gameSubtitle"></div>
+    </div>
+
+    <div class="spinner-wrap">
+      <div class="spinner-outer">
+        <div class="spinner-ring" id="spinnerRing">🎲</div>
+      </div>
+    </div>
+
+    <div class="players-wrap" id="playersTiles"></div>
+    <div class="game-status" id="gameStatusText"></div>
+    <div id="gameInviteRow" style="display:none"></div>
+    <div id="gameResultCard"></div>
+    <button id="gameCloseBtn" class="join-btn" style="display:none;margin-top:14px" onclick="closeGame()">Закрыть</button>
+  </div>
+</div>
+
+<div class="toast" id="winToast">
+  <div>🎉 ВЫ ВЫИГРАЛИ!</div>
+  <div class="toast-amount" id="toastAmount"></div>
+  <div class="toast-local" id="toastLocal"></div>
+</div>
+<div class="notif" id="notif"></div>
+
+<script>
+// ══════════════════════════════════════
+//  TELEGRAM INIT
+// ══════════════════════════════════════
+const tg = window.Telegram.WebApp;
+tg.ready(); tg.expand(); tg.enableClosingConfirmation();
+const tgUser = tg.initDataUnsafe?.user;
+const TG_ID   = tgUser?.id || ('demo_'+Math.random().toString(36).substr(2,6));
+const TG_NAME = tgUser?.first_name || tgUser?.username || 'Player';
+const TG_LANG = tgUser?.language_code || navigator.language?.split('-')[0] || 'en';
+tg.MainButton.setText('💳 Пополнить баланс'); tg.MainButton.onClick(()=>deposit()); tg.MainButton.show();
+
+// ══════════════════════════════════════
+//  CURRENCY
+// ══════════════════════════════════════
+const CURRENCIES={
+  uz:{code:'UZS',symbol:'сўм',flag:'🇺🇿',name:'Oʻzbek soʻmi',rate:12800},
+  ru:{code:'RUB',symbol:'₽',flag:'🇷🇺',name:'Russian Ruble',rate:92},
+  az:{code:'AZN',symbol:'₼',flag:'🇦🇿',name:'Azerbaijani Manat',rate:1.70},
+  kk:{code:'KZT',symbol:'₸',flag:'🇰🇿',name:'Kazakh Tenge',rate:450},
+  uk:{code:'UAH',symbol:'₴',flag:'🇺🇦',name:'Ukrainian Hryvnia',rate:41},
+  en:{code:'USD',symbol:'$',flag:'🇺🇸',name:'US Dollar',rate:1},
+};
+// Default to UZS for Uzbekistan market (override browser locale)
+const CUR=CURRENCIES['uz'];
+
+// For UZS locale: show local as primary, USD as reference
+const isUZS=(CUR.code==='UZS');
+
+function fLocal(u){
+  const v=u*CUR.rate;
+  // Uzbek number format: spaces as thousands separator
+  const formatted=v>=1000
+    ?Math.round(v).toLocaleString('ru-RU').replace(/,/g,' ')
+    :v.toFixed(0);
+  return formatted+' '+CUR.symbol;
+}
+function fUSD(u){return'$'+(u%1===0?u:u.toFixed(2))}
+
+// Primary display: UZS for uz locale, USD for others
+function fPrimary(u){return isUZS?fLocal(u):fUSD(u)}
+function fSecondary(u){return isUZS?fUSD(u):fLocal(u)}
+
+// ══════════════════════════════════════
+//  GAME CONFIG
+// ══════════════════════════════════════
+const PUBLIC_NOMINALS=[5,10,20,50,100];
+const PRIVATE_NOMINALS=[20,50,100,200,300,400,500];
+const PLAYER_COUNTS=[3,5,7,10];
+const ROOM_CONFIG={3:{winners:1},5:{winners:2},7:{winners:3},10:{winners:4}};
+
+function calcRoom(n,p){
+  const w=ROOM_CONFIG[p].winners;
+  return{pot:n*p,eachPrize:n*2,platformFee:n*p-(n*2*w),winners:w};
+}
+
+function shuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+
+// ══════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════
+let userData=null,publicRooms=[],privateRooms=[];
+let currentGameRoom=null,currentGameIsPrivate=false,mySlots=[];
+let createNominal=PUBLIC_NOMINALS[0],createPlayers=3,createType='public';
+
+// ══════════════════════════════════════
+//  USER DATA
+// ══════════════════════════════════════
+function loadUser(){
+  const r=localStorage.getItem('ln_user_'+TG_ID);
+  userData=r?JSON.parse(r):{id:TG_ID,name:TG_NAME,balanceUSD:100,history:[]};
+}
+function saveUser(){localStorage.setItem('ln_user_'+TG_ID,JSON.stringify(userData))}
+
+// ══════════════════════════════════════
+//  ROOMS
+// ══════════════════════════════════════
+function initPublicRooms(){
+  const s=localStorage.getItem('ln_public_rooms');
+  const sl=s?JSON.parse(s):[];
+  publicRooms=[];
+  for(const n of PUBLIC_NOMINALS)for(const p of PLAYER_COUNTS){
+    const id=`pub_${n}_${p}`;
+    const ex=sl.find(r=>r.id===id);
+    publicRooms.push({id,nominal:n,maxPlayers:p,isPrivate:false,players:ex?.players||[],gameActive:ex?.gameActive||false,...calcRoom(n,p)});
+  }
+}
+function savePublicRooms(){localStorage.setItem('ln_public_rooms',JSON.stringify(publicRooms))}
+function loadPrivateRooms(){const r=localStorage.getItem('ln_private_rooms_'+TG_ID);privateRooms=r?JSON.parse(r):[]}
+function savePrivateRooms(){localStorage.setItem('ln_private_rooms_'+TG_ID,JSON.stringify(privateRooms))}
+function genCode(){return Math.random().toString(36).substr(2,6).toUpperCase()}
+
+// ══════════════════════════════════════
+//  CREATE ROOM MODAL
+// ══════════════════════════════════════
+function buildNominalChips(){
+  const list=createType==='private'?PRIVATE_NOMINALS:PUBLIC_NOMINALS;
+  document.getElementById('nominalChips').innerHTML=list.map((n,i)=>
+    `<button class="chip ${i===0?'active':''}" data-val="${n}" onclick="selectNominal(this)">${fUSD(n)}</button>`
+  ).join('');
+  createNominal=list[0];
+}
+
+function openCreateModal(){
+  createNominal=PUBLIC_NOMINALS[0];createPlayers=3;createType='public';
+  document.querySelectorAll('#playersChips .chip').forEach((c,i)=>c.classList.toggle('active',i===0));
+  document.querySelectorAll('#typeChips .chip').forEach((c,i)=>c.classList.toggle('active',i===0));
+  buildNominalChips();updateCreatePreview();
+  document.getElementById('createOverlay').classList.add('active');
+}
+
+function selectNominal(btn){
+  document.querySelectorAll('#nominalChips .chip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');createNominal=parseFloat(btn.dataset.val);updateCreatePreview();
+}
+function selectPlayers(btn){
+  document.querySelectorAll('#playersChips .chip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');createPlayers=parseInt(btn.dataset.val);updateCreatePreview();
+}
+function selectType(btn){
+  document.querySelectorAll('#typeChips .chip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');createType=btn.dataset.val;buildNominalChips();updateCreatePreview();
+}
+
+function updateCreatePreview(){
+  const c=calcRoom(createNominal,createPlayers);
+  document.getElementById('createPreview').innerHTML=`
+    <div class="preview-row"><span class="preview-key">Ставка</span><span class="preview-val gold">${fPrimary(createNominal)} <small style="color:var(--text3);font-size:11px">${fSecondary(createNominal)}</small></span></div>
+    <div class="preview-row"><span class="preview-key">Игроки</span><span class="preview-val">${createPlayers}</span></div>
+    <div class="preview-row"><span class="preview-key">Общий банк</span><span class="preview-val">${fPrimary(c.pot)} <small style="color:var(--text3);font-size:11px">${fSecondary(c.pot)}</small></span></div>
+    <div class="preview-divider"></div>
+    <div class="preview-row"><span class="preview-key">Победителей</span><span class="preview-val teal">${c.winners}</span></div>
+    <div class="preview-row"><span class="preview-key">Каждый получит</span><span class="preview-val gold">${fPrimary(c.eachPrize)} <small style="color:var(--text3);font-size:11px">${fSecondary(c.eachPrize)}</small></span></div>
+    <div class="preview-divider"></div>
+    <div class="preview-row"><span class="preview-key">Комиссия</span><span class="preview-val red">${fPrimary(c.platformFee)} <small style="color:var(--text3);font-size:11px">${fSecondary(c.platformFee)}</small></span></div>
+  `;
+}
+
+function createRoom(){
+  if(!userData||userData.balanceUSD<createNominal){notify('❌ Недостаточно средств','error');return}
+  const calc=calcRoom(createNominal,createPlayers);
+  if(createType==='private'){
+    const code=genCode();
+    const room={id:'prv_'+code,nominal:createNominal,maxPlayers:createPlayers,isPrivate:true,inviteCode:code,creatorId:TG_ID,players:[],gameActive:false,...calc};
+    privateRooms.push(room);savePrivateRooms();
+    closeOverlay('createOverlay');enterRoom(room,true);
+    setTimeout(()=>{
+      tg.showPopup({title:'🎉 Комната создана!',message:`Код приглашения: ${code}\nОтправьте друзьям!`,
+        buttons:[{type:'default',text:'📋 Скопировать',id:'copy'},{type:'cancel',text:'Закрыть'}]
+      },(id)=>{if(id==='copy'){navigator.clipboard.writeText(code).catch(()=>{});notify('✅ Код скопирован!','success')}});
+    },300);
+  }else{
+    const room=publicRooms.find(r=>r.nominal===createNominal&&r.maxPlayers===createPlayers&&!r.gameActive&&r.players.length<r.maxPlayers);
+    if(!room){notify('❌ Нет свободных комнат','error');return}
+    closeOverlay('createOverlay');enterRoom(room,false);
+  }
+}
+
+// ══════════════════════════════════════
+//  JOIN
+// ══════════════════════════════════════
+function joinRoom(roomId,isPrivate){
+  const room=(isPrivate?privateRooms:publicRooms).find(r=>r.id===roomId);
+  if(room)enterRoom(room,isPrivate);
+}
+
+function enterRoom(room,isPrivate){
+  if(!userData)return;
+  if(room.gameActive){notify('🎲 Игра уже идёт!','error');return}
+  if(room.players.length>=room.maxPlayers){notify('❌ Комната заполнена!','error');return}
+  if(userData.balanceUSD<room.nominal){notify('❌ Недостаточно средств!','error');return}
+
+  userData.balanceUSD-=room.nominal;saveUser();
+
+  const taken=room.players.map(p=>p.number);
+  const available=Array.from({length:room.maxPlayers},(_,i)=>i+1).filter(n=>!taken.includes(n));
+  const number=available[Math.floor(Math.random()*available.length)];
+  const playerId=TG_ID+'_'+Date.now();
+
+  room.players.push({id:playerId,number,name:userData.name,userId:TG_ID});
+  mySlots.push(playerId);
+  if(isPrivate)savePrivateRooms();else savePublicRooms();
+
+  currentGameRoom=room;currentGameIsPrivate=isPrivate;
+  updateUI();openGameView();
+  notify(`✅ Вы вошли под номером ${number}!`,'success');
+  if(room.players.length===room.maxPlayers)setTimeout(()=>startGame(),800);
+}
+
+function joinByCode(){
+  const code=(document.getElementById('codeInput').value||'').trim().toUpperCase();
+  if(!code){notify('Введите код!','error');return}
+  const room=privateRooms.find(r=>r.inviteCode===code);
+  if(!room){notify('❌ Комната не найдена!','error');return}
+  document.getElementById('codeInput').value='';
+  closeOverlay('joinOverlay');mySlots=[];enterRoom(room,true);
+}
+
+// ══════════════════════════════════════
+//  GAME VIEW
+// ══════════════════════════════════════
+function openGameView(){
+  const room=currentGameRoom;if(!room)return;
+  document.getElementById('gameTitle').textContent=`${fPrimary(room.nominal)} · ${room.isPrivate?'🔒 Приватная':'🌐 Общая'}`;
+  document.getElementById('gameSubtitle').textContent=`${room.winners} победител${room.winners>1?'я':'ь'} → ${fPrimary(room.eachPrize)} каждому`;
+  document.getElementById('spinnerRing').textContent='🎲';
+  document.getElementById('spinnerRing').classList.remove('spinning');
+  document.getElementById('gameResultCard').innerHTML='';
+  document.getElementById('gameCloseBtn').style.display='none';
+
+  const invRow=document.getElementById('gameInviteRow');
+  if(room.isPrivate&&room.inviteCode){
+    invRow.style.display='block';
+    invRow.innerHTML=`
+      <div class="invite-row">
+        <span style="font-size:11px;color:var(--text3)">🔑 Код:</span>
+        <span class="invite-code-display">${room.inviteCode}</span>
+        <button class="copy-btn" onclick="copyCode('${room.inviteCode}')">📋</button>
+      </div>
+      <div class="share-row">
+        <button class="share-btn tg" onclick="shareTelegram('${room.inviteCode}',${room.nominal},${room.maxPlayers})">✈️ Telegram</button>
+        <button class="share-btn wa" onclick="shareWhatsApp('${room.inviteCode}',${room.nominal},${room.maxPlayers})">💬 WhatsApp</button>
+        <button class="share-btn lnk" onclick="copyInviteLink('${room.inviteCode}',${room.nominal},${room.maxPlayers})">🔗 Ссылка</button>
+      </div>`;
+  }else{invRow.style.display='none'}
+
+  renderGamePlayers();
+  document.getElementById('gameOverlay').classList.add('active');
+}
+
+function renderGamePlayers(){
+  const room=currentGameRoom;if(!room)return;
+  let html='';
+  room.players.forEach(p=>{html+=`<div class="p-tile ${mySlots.includes(p.id)?'me':''}" id="tile_${p.id}">${p.number}</div>`});
+  for(let i=0;i<room.maxPlayers-room.players.length;i++)html+=`<div class="p-tile" style="opacity:0.25">·</div>`;
+  document.getElementById('playersTiles').innerHTML=html;
+  const myNums=room.players.filter(p=>mySlots.includes(p.id)).map(p=>p.number);
+  document.getElementById('gameStatusText').textContent=
+    room.players.length<room.maxPlayers
+      ?`Ожидаем игроков · ${room.players.length}/${room.maxPlayers}${myNums.length?` · Ваш номер: ${myNums.join(', ')}`:''}`
+      :`Игра начинается · Ваш номер: ${myNums.join(', ')}`;
+}
+
+// ══════════════════════════════════════
+//  GAME LOGIC
+// ══════════════════════════════════════
+function startGame(){
+  const room=currentGameRoom;if(!room||room.gameActive)return;
+  room.gameActive=true;
+  if(currentGameIsPrivate)savePrivateRooms();else savePublicRooms();
+  document.getElementById('gameStatusText').textContent='🎰 Разыгрываем номера...';
+  const spinner=document.getElementById('spinnerRing');
+  spinner.classList.add('spinning');
+  const nums=room.players.map(p=>p.number);
+  let tick=0;
+  const iv=setInterval(()=>{spinner.textContent=nums[tick++%nums.length]},80);
+  setTimeout(()=>{clearInterval(iv);spinner.classList.remove('spinning');revealWinners()},3000);
+}
+
+function revealWinners(){
+  const room=currentGameRoom;if(!room)return;
+  const shuffled=shuffle(room.players);
+  const winnerPlayers=shuffled.slice(0,room.winners);
+  document.getElementById('spinnerRing').textContent=winnerPlayers[0].number;
+  winnerPlayers.forEach(w=>{const t=document.getElementById('tile_'+w.id);if(t)t.classList.add('winner')});
+
+  let myWin=0,myWinNums=[];
+  winnerPlayers.forEach(w=>{if(mySlots.includes(w.id)){myWin+=room.eachPrize;myWinNums.push(w.number)}});
+
+  if(myWin>0){userData.balanceUSD+=myWin;saveUser();showWinToast(myWin)}
+
+  userData.history.unshift({date:new Date().toLocaleString('en'),nominal:room.nominal,maxPlayers:room.maxPlayers,pot:room.pot,platformFee:room.platformFee,winners:winnerPlayers.map(w=>({number:w.number,prize:room.eachPrize})),myWin,isPrivate:room.isPrivate});
+  if(userData.history.length>50)userData.history=userData.history.slice(0,50);
+  saveUser();
+
+  document.getElementById('gameResultCard').innerHTML=`
+    <div class="result-card">
+      <div class="result-title">🎉 Результаты розыгрыша</div>
+      <div class="result-row">Банк: <strong>${fPrimary(room.pot)}</strong> <span style="color:var(--text3)">(${fSecondary(room.pot)})</span></div>
+      <div class="result-row">Комиссия: <strong>${fPrimary(room.platformFee)}</strong></div>
+      <div style="height:8px"></div>
+      ${winnerPlayers.map(w=>`<div class="result-row">🎲 Номер <strong style="color:var(--text)">${w.number}</strong> → <strong style="color:var(--gold)">${fPrimary(room.eachPrize)}</strong></div>`).join('')}
+      ${myWin>0?`<div class="result-win">+${fPrimary(myWin)}<br><span style="font-size:14px;opacity:0.7">${fSecondary(myWin)}</span></div>`:`<div style="color:var(--text3);font-size:13px;margin-top:12px">😢 В следующий раз повезёт!</div>`}
+    </div>`;
+  document.getElementById('gameStatusText').textContent='';
+  document.getElementById('gameCloseBtn').style.display='block';
+
+  setTimeout(()=>{
+    if(currentGameIsPrivate){privateRooms=privateRooms.filter(r=>r.id!==room.id);savePrivateRooms()}
+    else{const i=publicRooms.findIndex(r=>r.id===room.id);if(i!==-1){publicRooms[i]={...publicRooms[i],players:[],gameActive:false};savePublicRooms()}}
+    updateUI();
+  },1000);
+}
+
+function closeGame(){
+  document.getElementById('gameOverlay').classList.remove('active');
+  currentGameRoom=null;mySlots=[];updateUI();
+}
+
+// ══════════════════════════════════════
+//  RENDER
+// ══════════════════════════════════════
+function renderPublicRooms(){
+  const grid=document.getElementById('publicGrid');if(!grid)return;
+  let html='';
+  for(const nominal of PUBLIC_NOMINALS){
+    html+=`<div class="section-label">${fPrimary(nominal)} <small style="font-size:9px;text-transform:none;letter-spacing:0">${fSecondary(nominal)}</small></div>`;
+    for(const players of PLAYER_COUNTS){
+      const room=publicRooms.find(r=>r.nominal===nominal&&r.maxPlayers===players);
+      if(room)html+=buildRoomCard(room,false);
+    }
+  }
+  grid.innerHTML=html;
+}
+
+function renderPrivateRooms(){
+  const grid=document.getElementById('privateGrid');if(!grid)return;
+  if(privateRooms.length===0){
+    grid.innerHTML=`<div class="empty-state"><div class="empty-icon">🔒</div><div class="empty-title">Нет приватных комнат</div><div class="empty-sub">Нажмите ＋ чтобы создать свою комнату и пригласить друзей</div></div>`;
+    return;
+  }
+  grid.innerHTML=privateRooms.map(r=>buildRoomCard(r,true)).join('');
+}
+
+function buildRoomCard(room,isPrivate){
+  const filled=room.players.length;
+  const pct=Math.round((filled/room.maxPlayers)*100);
+  const canJoin=userData&&!room.gameActive&&filled<room.maxPlayers&&userData.balanceUSD>=room.nominal;
+  const myNums=room.players.filter(p=>p.userId===TG_ID).map(p=>p.number);
+
+  const dots=Array.from({length:room.maxPlayers},(_,i)=>{
+    const p=room.players[i];
+    if(!p)return`<div class="num-dot"></div>`;
+    return`<div class="num-dot ${p.userId===TG_ID?'mine':'filled'}">${p.number}</div>`;
+  }).join('');
+
+  const invHtml=isPrivate&&room.inviteCode?`
+    <div class="invite-row">
+      <span style="font-size:10px;color:var(--text3)">🔑</span>
+      <span class="invite-code-display">${room.inviteCode}</span>
+      <button class="copy-btn" onclick="copyCode('${room.inviteCode}')">📋</button>
+    </div>
+    <div class="share-row">
+      <button class="share-btn tg" onclick="shareTelegram('${room.inviteCode}',${room.nominal},${room.maxPlayers})">✈️ Telegram</button>
+      <button class="share-btn wa" onclick="shareWhatsApp('${room.inviteCode}',${room.nominal},${room.maxPlayers})">💬 WhatsApp</button>
+      <button class="share-btn lnk" onclick="copyInviteLink('${room.inviteCode}',${room.nominal},${room.maxPlayers})">🔗 Ссылка</button>
+    </div>`:'';
+
+  let btnLabel=`Войти · ${fPrimary(room.nominal)}`;
+  if(room.gameActive)btnLabel='🎲 Идёт игра';
+  else if(filled>=room.maxPlayers)btnLabel='🔴 Комната заполнена';
+  else if(myNums.length>0)btnLabel=`+ Ещё номер · ${fPrimary(room.nominal)}`;
+
+  return`
+    <div class="room-card ${isPrivate?'private-room':''}">
+      <div class="room-top">
+        <div class="room-amount-wrap">
+          <div class="room-usd">${fPrimary(room.nominal)}</div>
+          <div class="room-local">${fSecondary(room.nominal)}</div>
+        </div>
+        <div class="room-badges">
+          ${isPrivate?'<span class="badge badge-private">Приватная</span>':''}
+          <span class="badge badge-players">👥 ${room.maxPlayers}</span>
+          ${filled>=room.maxPlayers?'<span class="badge badge-full">Занята</span>':''}
+        </div>
+      </div>
+      <div class="prize-row">
+        <span class="prize-label">🏆 ${room.winners} победител${room.winners>1?'я':'ь'}</span>
+        <div class="prize-right">
+          <span class="prize-val">${fPrimary(room.eachPrize)}</span>
+          <span class="prize-local">${fSecondary(room.eachPrize)}</span>
+        </div>
+      </div>
+      ${invHtml}
+      <div class="number-dots">${dots}</div>
+      <div class="progress-row">
+        <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+        <span class="progress-text">${filled}/${room.maxPlayers}</span>
+      </div>
+      <button class="join-btn ${isPrivate?'teal':''}" onclick="joinRoom('${room.id}',${isPrivate})" ${!canJoin?'disabled':''}>${btnLabel}</button>
+    </div>`;
+}
+
+function renderHistory(){
+  const el=document.getElementById('historyGrid');if(!el)return;
+  if(!userData||userData.history.length===0){
+    el.innerHTML='<div class="empty-state"><div class="empty-icon">📜</div><div class="empty-title">Игр ещё нет</div><div class="empty-sub">Войдите в комнату и сыграйте первую игру</div></div>';
+    return;
+  }
+  el.innerHTML=userData.history.slice(0,20).map(g=>`
+    <div class="history-item">
+      <div class="history-top">
+        <span class="history-date">📅 ${g.date}</span>
+        ${g.myWin>0?`<span class="history-win">+${fPrimary(g.myWin)}</span>`:'<span class="history-loss">Не повезло</span>'}
+      </div>
+      <div class="history-detail">
+        ${fPrimary(g.nominal)} · ${g.maxPlayers} игроков${g.isPrivate?' 🔒':''}<br>
+        Банк: ${fPrimary(g.pot)} · Комиссия: ${fPrimary(g.platformFee)}<br>
+        🏆 ${g.winners.map(w=>`#${w.number} → ${fPrimary(w.prize)}`).join(', ')}
+        ${g.myWin>0?`<br><span style="color:var(--teal)">Выигрыш: ${fLocal(g.myWin)}</span>`:''}
+      </div>
+    </div>`).join('');
+}
+
+function updateUI(){
+  if(userData){
+    const u=userData.balanceUSD;
+    document.getElementById('headerUSD').textContent=fPrimary(u);
+    document.getElementById('headerLocal').textContent=isUZS?fUSD(u):fLocal(u);
+    document.getElementById('cabBalance').textContent=fPrimary(u);
+    document.getElementById('cabBalanceLocal').textContent=isUZS?fUSD(u):fLocal(u);
+    document.getElementById('cabUserId').textContent='LUCKY_'+userData.id;
+    document.getElementById('currFlag').textContent=CUR.flag;
+    document.getElementById('currName').textContent=CUR.code;
+    document.getElementById('currRate').textContent=isUZS?`1 $ = ${(12800).toLocaleString('ru-RU')} сўм`:`1 USD = ${CUR.rate} ${CUR.code}`;
+  }
+  renderPublicRooms();renderPrivateRooms();renderHistory();
+}
+
+// ══════════════════════════════════════
+//  TABS & MODALS
+// ══════════════════════════════════════
+const NAV_TABS={public:'navPublic',private:'navPrivate',history:'navHistory'};
+
+function navSwitch(tab){
+  // Update bottom nav active state
+  Object.values(NAV_TABS).forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.classList.remove('active');
+  });
+  if(NAV_TABS[tab])document.getElementById(NAV_TABS[tab])?.classList.add('active');
+  // Switch panel
+  switchTab(tab,null);
+  // Scroll to top for fresh context
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function switchTab(tab,btn){
+  document.getElementById('panelPublic').style.display=tab==='public'?'block':'none';
+  document.getElementById('panelPrivate').style.display=tab==='private'?'block':'none';
+  document.getElementById('panelHistory').style.display=tab==='history'?'block':'none';
+}
+function closeOverlay(id){document.getElementById(id).classList.remove('active')}
+function openJoinModal(){document.getElementById('joinOverlay').classList.add('active')}
+function openCabinet(){document.getElementById('cabinetOverlay').classList.add('active')}
+function overlayClose(e,id){if(e.target===document.getElementById(id))closeOverlay(id)}
+
+// ══════════════════════════════════════
+//  SHARE
+// ══════════════════════════════════════
+function shareText(code,nominal,players){return`🎰 Lucky Number — Присоединяйся!\nСтавка: ${fPrimary(nominal)} · ${players} игроков\nКод комнаты: ${code}\nВойти: @LuckyNumberBot`}
+function shareTelegram(c,n,p){window.open(`https://t.me/share/url?url=https://t.me/LuckyNumberBot&text=${encodeURIComponent(shareText(c,n,p))}`,'_blank')}
+function shareWhatsApp(c,n,p){window.open(`https://wa.me/?text=${encodeURIComponent(shareText(c,n,p))}`,'_blank')}
+function copyInviteLink(c,n,p){navigator.clipboard.writeText(shareText(c,n,p)).catch(()=>{});notify('✅ Ссылка скопирована!','success')}
+function copyCode(code){navigator.clipboard.writeText(code).catch(()=>{});notify('✅ Код скопирован!','success')}
+
+// ══════════════════════════════════════
+//  CABINET
+// ══════════════════════════════════════
+function deposit(){
+  tg.showPopup({title:'💳 Пополнение баланса',
+    message:`Валюта: ${CUR.flag} ${CUR.code}\nКурс: 1 $ = ${(12800).toLocaleString('ru-RU')} сўм\n\nПополнение скоро будет доступно!`,
+    buttons:[{type:'default',text:'Демо +1 280 000 сўм',id:'demo'},{type:'cancel',text:'Отмена'}]
+  },(id)=>{if(id==='demo'){userData.balanceUSD+=100;saveUser();updateUI();notify('✅ Демо: +1 280 000 сўм добавлено','success')}});
+}
+function withdraw(){tg.showAlert('💸 Для вывода средств обратитесь: @LuckyNumberSupport')}
+function logout(){tg.showConfirm('Выйти из аккаунта?',(ok)=>{if(ok){userData=null;closeOverlay('cabinetOverlay');tg.close()}})}
+
+// ══════════════════════════════════════
+//  TOASTS
+// ══════════════════════════════════════
+function showWinToast(amount){
+  document.getElementById('toastAmount').textContent=fUSD(amount);
+  document.getElementById('toastLocal').textContent=fLocal(amount);
+  const el=document.getElementById('winToast');
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),3500);
+}
+let notifTimer;
+function notify(msg,type='success'){
+  const el=document.getElementById('notif');
+  el.textContent=msg;el.className='notif show '+type;
+  clearTimeout(notifTimer);
+  notifTimer=setTimeout(()=>el.classList.remove('show'),2500);
+}
+
+// ══════════════════════════════════════
+//  AUTO-START
+// ══════════════════════════════════════
+setInterval(()=>{
+  [...publicRooms,...privateRooms].forEach(room=>{
+    if(room.players.length===room.maxPlayers&&!room.gameActive){
+      room.gameActive=true;
+      if(room.isPrivate)savePrivateRooms();else savePublicRooms();
+      if(currentGameRoom?.id===room.id)startGame();
+    }
+  });
+},1500);
+
+// ══════════════════════════════════════
+//  BOOT
+// ══════════════════════════════════════
+loadUser();initPublicRooms();loadPrivateRooms();updateUI();
+</script>
+</body>
+</html>
