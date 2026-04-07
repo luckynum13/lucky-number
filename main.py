@@ -1,330 +1,296 @@
 """
-Lucky Number Bot — Main Entry Point
+Lucky Number Bot — @Nomer_13bot
+Railway deployment with FastAPI + python-telegram-bot
 """
-
 import os
 import logging
-import asyncio
-import random as _random
-from decimal import Decimal
-
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
-import uvicorn
-
-from telegram import Update
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
-from telegram.ext import Application, CommandHandler, ContextTypes
-from database import init_db, get_or_create_user, get_user_balance
-from payments import setup_payment_handlers
-from rooms import setup_room_handlers, ROOMS, calc_room, PUBLIC_NOMINALS, PLAYER_COUNTS
-
-# ─────────────────────────────────────────────
-#  LOGGING
-# ─────────────────────────────────────────────
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+from telegram import (
+    Update, InlineKeyboardButton, InlineKeyboardMarkup,
+    WebAppInfo, Bot
 )
+from telegram.ext import (
+    Application, CommandHandler, MessageHandler,
+    CallbackQueryHandler, filters
+)
+
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# ─────────────────────────────────────────────
-#  CONFIG
-# ─────────────────────────────────────────────
-BOT_TOKEN   = os.getenv("BOT_TOKEN", "8716061480:AAGCDc5OadCagPtSOvo_IvedhvMNgQ7uQCs")
-WEBHOOK_URL = os.getenv("WEBHOOK_URL", "https://lucky-number.fly.dev")
-PORT        = int(os.getenv("PORT", "8080"))
-MINI_APP_URL = os.getenv("MINI_APP_URL", "https://luckynum13.github.io/lucky-number")
+BOT_TOKEN = os.environ.get("BOT_TOKEN", "")
+WEBAPP_URL = "https://luckynum13.github.io/lucky-number/"
+SUPPORT_USERNAME = "LuckyNumberSupport"
+CHANNEL_URL = "https://t.me/LuckyNumberChannel"
 
-# ─────────────────────────────────────────────
-#  FASTAPI APP
-# ─────────────────────────────────────────────
-app = FastAPI(title="Lucky Number Bot")
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-bot_app: Application = None
+app = FastAPI()
+bot = Bot(token=BOT_TOKEN)
+application = Application.builder().token(BOT_TOKEN).build()
 
 
-# ─────────────────────────────────────────────
-#  BOT COMMANDS
-# ─────────────────────────────────────────────
-async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+# ─── HELPERS ───
+
+def fNum(v):
+    """Format number with spaces: 1280000 -> '1 280 000'"""
+    return f"{int(v):,}".replace(",", " ")
+
+def fShort(v):
+    """Short format: 1000000 -> '1 млн', 500000 -> '500 000'"""
+    if v >= 1_000_000:
+        m = v / 1_000_000
+        return f"{int(m)} млн" if m == int(m) else f"{m:.1f} млн"
+    return fNum(v)
+
+
+def main_keyboard():
+    """Main menu inline keyboard"""
+    return InlineKeyboardMarkup([
+        [InlineKeyboardButton(
+            "🎮 Открыть игру",
+            web_app=WebAppInfo(url=WEBAPP_URL)
+        )],
+        [
+            InlineKeyboardButton("💳 Пополнить", callback_data="deposit"),
+            InlineKeyboardButton("💸 Вывести", callback_data="withdraw"),
+        ],
+        [InlineKeyboardButton(
+            "👥 Играть с друзьями",
+            web_app=WebAppInfo(url=WEBAPP_URL + "?action=create_private")
+        )],
+        [InlineKeyboardButton("📊 Мои результаты", callback_data="results")],
+        [
+            InlineKeyboardButton("📢 Наш канал", url=CHANNEL_URL),
+            InlineKeyboardButton("📞 Поддержка", url=f"https://t.me/{SUPPORT_USERNAME}"),
+        ],
+    ])
+
+
+def quick_play_keyboard():
+    """Quick keyboard for non-command messages"""
+    return InlineKeyboardMarkup([
+        [InlineKeyboardButton(
+            "🎮 Открыть Lucky Number",
+            web_app=WebAppInfo(url=WEBAPP_URL)
+        )],
+    ])
+
+
+def share_keyboard(code, nom, max_players):
+    """Share buttons after creating a private room"""
+    share_text = (
+        f"🎰 Lucky Number\n\n"
+        f"Ставка: {fNum(nom)} сўм · {max_players} игроков\n"
+        f"Код: {code}\n\n"
+        f"Присоединяйся!"
+    )
+    tg_share_url = (
+        f"https://t.me/share/url"
+        f"?url=https://t.me/Nomer_13bot"
+        f"&text={share_text}"
+    )
+    wa_share_url = f"https://wa.me/?text={share_text}"
+
+    return InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton("📲 Telegram", url=tg_share_url),
+            InlineKeyboardButton("📲 WhatsApp", url=wa_share_url),
+        ],
+        [InlineKeyboardButton("🔗 Скопировать код", callback_data=f"copy_{code}")],
+        [InlineKeyboardButton(
+            "🎮 Открыть игру",
+            web_app=WebAppInfo(url=WEBAPP_URL)
+        )],
+    ])
+
+
+# ─── HANDLERS ───
+
+async def start_handler(update: Update, context):
+    """Handle /start command — main welcome message"""
     user = update.effective_user
-    await get_or_create_user(telegram_id=user.id, username=user.username, first_name=user.first_name)
-    balance = await get_user_balance(user.id)
+    name = user.first_name or user.username or "Игрок"
+
+    welcome_text = (
+        f"🎰 *Lucky Number*\n\n"
+        f"Привет, {name}! 👋\n"
+        f"Добро пожаловать в Lucky Number — "
+        f"честная лотерея с моментальными выплатами!\n\n"
+        f"─────────────────\n"
+        f"✅ Честная игра\n"
+        f"⚡ Моментальные выплаты\n"
+        f"🔒 Безопасные платежи\n"
+        f"─────────────────\n\n"
+        f"💳 *Платежи:* P2P (UZcard, HUMO, Payme)\n"
+        f"📥 Пополнение: комиссия 4%\n"
+        f"📤 Вывод: комиссия 2% · от 2 до 24 ч\n\n"
+        f"*Ставки:*\n"
+        f"60 000 · 150 000 · 500 000\n"
+        f"1 000 000 · 2 500 000 сўм\n\n"
+        f"Выбери действие 👇"
+    )
+
     await update.message.reply_text(
-        f"🎰 *Welcome to Lucky Number!*\n\n"
-        f"Hello, {user.first_name}!\n\n"
-        f"💰 Your balance: *${balance}*\n\n"
-        f"*Commands:*\n"
-        f"/play — open the game\n"
-        f"/balance — check balance\n"
-        f"/deposit — add funds\n"
-        f"/withdraw — withdraw winnings\n"
-        f"/help — how to play",
+        welcome_text,
         parse_mode="Markdown",
+        reply_markup=main_keyboard()
     )
 
 
-async def cmd_balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    balance = await get_user_balance(update.effective_user.id)
+async def help_handler(update: Update, context):
+    """Handle /help command"""
+    help_text = (
+        "❓ *Как играть:*\n\n"
+        "1️⃣ Выбери комнату и внеси ставку\n"
+        "2️⃣ Получи случайный номер\n"
+        "3️⃣ Жди, пока все места заполнятся\n"
+        "4️⃣ Победители получают *×2* от ставки!\n\n"
+        "Все номера открыты — система прозрачная.\n\n"
+        "📞 Поддержка: @LuckyNumberSupport"
+    )
     await update.message.reply_text(
-        f"💰 *Your balance:* ${balance}\n\nUse /deposit to add funds",
+        help_text,
         parse_mode="Markdown",
+        reply_markup=quick_play_keyboard()
     )
 
 
-async def cmd_play(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    keyboard = [[InlineKeyboardButton(text="🎰 Open Lucky Number", web_app=WebAppInfo(url=MINI_APP_URL))]]
+async def any_message_handler(update: Update, context):
+    """Handle any text message — always give a play button"""
+    user = update.effective_user
+    name = user.first_name or user.username or "Игрок"
+
     await update.message.reply_text(
-        "🎰 *Lucky Number*\n\nTap the button to open the game!",
-        parse_mode="Markdown",
-        reply_markup=InlineKeyboardMarkup(keyboard),
+        f"Привет, {name}! 🎰\n"
+        f"Нажми кнопку, чтобы начать игру!",
+        reply_markup=quick_play_keyboard()
     )
 
 
-async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text(
-        "🎰 *Lucky Number — How to Play*\n\n"
-        "*Public rooms:* $5 / $10 / $20 / $50 / $100\n"
-        "*Private rooms:* $20 to $500\n\n"
-        "*Prize structure:*\n"
-        "• 3 players → 1 winner gets 2× bet\n"
-        "• 5 players → 2 winners get 2× bet each\n"
-        "• 7 players → 3 winners get 2× bet each\n"
-        "• 10 players → 4 winners get 2× bet each\n\n"
-        "Support: @LuckyNumberSupport",
-        parse_mode="Markdown",
-    )
+async def callback_handler(update: Update, context):
+    """Handle inline button callbacks"""
+    query = update.callback_query
+    await query.answer()
+
+    data = query.data
+
+    if data == "deposit":
+        await query.message.reply_text(
+            "💳 *Пополнение баланса*\n\n"
+            "Способ: P2P (UZcard, HUMO, Payme)\n"
+            "Комиссия: 4%\n"
+            "Мин: 30 000 сўм\n"
+            "Макс: 5 700 000 сўм\n\n"
+            "Средства поступят мгновенно.\n\n"
+            "Для пополнения откройте игру 👇",
+            parse_mode="Markdown",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton(
+                    "🎮 Открыть игру",
+                    web_app=WebAppInfo(url=WEBAPP_URL)
+                )],
+            ])
+        )
+
+    elif data == "withdraw":
+        await query.message.reply_text(
+            "💸 *Вывод средств*\n\n"
+            "Способ: P2P (UZcard, HUMO, Payme)\n"
+            "Комиссия: 2%\n"
+            "Мин: 30 000 сўм\n"
+            "Макс: 5 700 000 сўм\n"
+            "Срок: от 2 до 24 часов\n\n"
+            "Средства поступят на вашу карту.\n\n"
+            f"📞 Для вывода напишите: @{SUPPORT_USERNAME}",
+            parse_mode="Markdown",
+        )
+
+    elif data == "results":
+        await query.message.reply_text(
+            "📊 *Мои результаты*\n\n"
+            "Вся статистика доступна в игре — "
+            "откройте вкладку «История» 👇",
+            parse_mode="Markdown",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton(
+                    "🎮 Открыть игру",
+                    web_app=WebAppInfo(url=WEBAPP_URL)
+                )],
+            ])
+        )
+
+    elif data.startswith("copy_"):
+        code = data.replace("copy_", "")
+        await query.message.reply_text(
+            f"📋 Код комнаты: `{code}`\n\n"
+            f"Отправь этот код друзьям!",
+            parse_mode="Markdown",
+        )
 
 
-# ─────────────────────────────────────────────
-#  TELEGRAM WEBHOOK
-# ─────────────────────────────────────────────
-@app.post("/webhook/telegram")
-async def telegram_webhook(request: Request):
-    data = await request.json()
-    update = Update.de_json(data, bot_app.bot)
-    await bot_app.process_update(update)
-    return JSONResponse({"status": "ok"})
+# ─── REGISTER HANDLERS ───
+
+application.add_handler(CommandHandler("start", start_handler))
+application.add_handler(CommandHandler("play", start_handler))
+application.add_handler(CommandHandler("help", help_handler))
+application.add_handler(CallbackQueryHandler(callback_handler))
+application.add_handler(MessageHandler(
+    filters.TEXT & ~filters.COMMAND,
+    any_message_handler
+))
 
 
-@app.post("/webhook/smart-glocal")
-async def smart_glocal_webhook(request: Request):
-    from payments import smart_glocal_webhook as sg_handler
-    return await sg_handler(request)
+# ─── FASTAPI ROUTES ───
+
+@app.on_event("startup")
+async def on_startup():
+    """Set webhook on startup"""
+    await application.initialize()
+    await application.start()
+
+    # Get Railway URL or use custom domain
+    railway_url = os.environ.get("RAILWAY_PUBLIC_DOMAIN", "")
+    if railway_url:
+        webhook_url = f"https://{railway_url}/webhook"
+        await bot.set_webhook(url=webhook_url)
+        logger.info(f"Webhook set: {webhook_url}")
+
+        # Set menu button to open the webapp
+        try:
+            from telegram import MenuButtonWebApp
+            await bot.set_chat_menu_button(
+                menu_button=MenuButtonWebApp(
+                    text="🎰 Играть",
+                    web_app=WebAppInfo(url=WEBAPP_URL)
+                )
+            )
+            logger.info("Menu button set")
+        except Exception as e:
+            logger.warning(f"Could not set menu button: {e}")
+
+
+@app.on_event("shutdown")
+async def on_shutdown():
+    await application.stop()
+    await application.shutdown()
+
+
+@app.post("/webhook")
+async def webhook(request: Request):
+    """Process incoming Telegram updates"""
+    try:
+        data = await request.json()
+        update = Update.de_json(data, bot)
+        await application.process_update(update)
+    except Exception as e:
+        logger.error(f"Webhook error: {e}")
+    return JSONResponse({"ok": True})
+
+
+@app.get("/")
+async def root():
+    return {"status": "Lucky Number Bot is running", "bot": "@Nomer_13bot"}
 
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "service": "Lucky Number Bot"}
-
-
-# ─────────────────────────────────────────────
-#  MINI APP API
-# ─────────────────────────────────────────────
-@app.get("/api/me")
-async def api_me(telegram_id: int):
-    await get_or_create_user(telegram_id)
-    balance = await get_user_balance(telegram_id)
-    return {"telegram_id": telegram_id, "balance": float(balance)}
-
-
-@app.get("/api/rooms")
-async def api_rooms():
-    public = []
-    for nominal in PUBLIC_NOMINALS:
-        for players in PLAYER_COUNTS:
-            room_id = f"pub_{nominal}_{players}"
-            if room_id not in ROOMS:
-                calc = calc_room(nominal, players)
-                ROOMS[room_id] = {
-                    "id": room_id, "type": "public",
-                    "nominal": nominal, "max_players": players,
-                    "winners": calc["winners"], "each_prize": calc["each_prize"],
-                    "platform_fee": calc["platform_fee"], "pot": calc["pot"],
-                    "players": [], "game_started": False,
-                }
-            r = ROOMS[room_id]
-            public.append({
-                "id": r["id"], "nominal": r["nominal"],
-                "max_players": r["max_players"], "winners": r["winners"],
-                "each_prize": r["each_prize"], "platform_fee": r["platform_fee"],
-                "pot": r["pot"], "player_count": len(r["players"]),
-                "game_started": r["game_started"],
-            })
-    return {"rooms": public}
-
-
-@app.post("/api/join")
-async def api_join(request: Request):
-    data = await request.json()
-    telegram_id = data.get("telegram_id")
-    room_id = data.get("room_id")
-    room = ROOMS.get(room_id)
-
-    if not room:
-        return JSONResponse({"ok": False, "error": "Room not found"}, status_code=404)
-    if room["game_started"]:
-        return JSONResponse({"ok": False, "error": "Game already started"}, status_code=400)
-    if len(room["players"]) >= room["max_players"]:
-        return JSONResponse({"ok": False, "error": "Room is full"}, status_code=400)
-
-    from database import debit_user_balance, is_duplicate_tx
-    balance = await get_user_balance(telegram_id)
-    if balance < room["nominal"]:
-        return JSONResponse({"ok": False, "error": "Insufficient balance"}, status_code=400)
-
-    taken = [p["number"] for p in room["players"]]
-    available = [n for n in range(1, room["max_players"] + 1) if n not in taken]
-    number = _random.choice(available)
-    tx_id = f"bet_{room_id}_{telegram_id}_{number}"
-
-    if await is_duplicate_tx(tx_id):
-        return JSONResponse({"ok": False, "error": "Already joined"}, status_code=400)
-
-    success = await debit_user_balance(telegram_id, Decimal(str(room["nominal"])), tx_id)
-    if not success:
-        return JSONResponse({"ok": False, "error": "Payment failed"}, status_code=400)
-
-    room["players"].append({"telegram_id": telegram_id, "number": number})
-    new_balance = await get_user_balance(telegram_id)
-
-    if len(room["players"]) == room["max_players"] and not room["game_started"]:
-        from rooms import run_game_draw
-        asyncio.create_task(run_game_draw(room_id, bot_app.bot))
-
-    return {"ok": True, "number": number, "balance": float(new_balance),
-            "player_count": len(room["players"])}
-
-
-@app.post("/api/create-private")
-async def api_create_private(request: Request):
-    data = await request.json()
-    telegram_id = data.get("telegram_id")
-    nominal = data.get("nominal")
-    players = data.get("players")
-
-    from database import debit_user_balance
-    balance = await get_user_balance(telegram_id)
-    if balance < nominal:
-        return JSONResponse({"ok": False, "error": "Insufficient balance"}, status_code=400)
-
-    calc = calc_room(nominal, players)
-    code = ''.join(_random.choices('ABCDEFGHJKLMNPQRSTUVWXYZ23456789', k=6))
-    room_id = f"prv_{code}"
-    tx_id = f"bet_{room_id}_{telegram_id}"
-
-    success = await debit_user_balance(telegram_id, Decimal(str(nominal)), tx_id)
-    if not success:
-        return JSONResponse({"ok": False, "error": "Payment failed"}, status_code=400)
-
-    ROOMS[room_id] = {
-        "id": room_id, "type": "private",
-        "nominal": nominal, "max_players": players,
-        "winners": calc["winners"], "each_prize": calc["each_prize"],
-        "platform_fee": calc["platform_fee"], "pot": calc["pot"],
-        "invite_code": code, "creator_id": telegram_id,
-        "players": [{"telegram_id": telegram_id, "number": 1}],
-        "game_started": False,
-    }
-    new_balance = await get_user_balance(telegram_id)
-    return {"ok": True, "invite_code": code, "room_id": room_id, "balance": float(new_balance)}
-
-
-@app.post("/api/join-private")
-async def api_join_private(request: Request):
-    data = await request.json()
-    telegram_id = data.get("telegram_id")
-    code = data.get("invite_code", "").upper()
-    room = next((r for r in ROOMS.values() if r.get("invite_code") == code), None)
-
-    if not room:
-        return JSONResponse({"ok": False, "error": "Room not found"}, status_code=404)
-    if room["game_started"] or len(room["players"]) >= room["max_players"]:
-        return JSONResponse({"ok": False, "error": "Room is full"}, status_code=400)
-
-    from database import debit_user_balance
-    balance = await get_user_balance(telegram_id)
-    if balance < room["nominal"]:
-        return JSONResponse({"ok": False, "error": "Insufficient balance"}, status_code=400)
-
-    taken = [p["number"] for p in room["players"]]
-    available = [n for n in range(1, room["max_players"] + 1) if n not in taken]
-    number = _random.choice(available)
-    tx_id = f"bet_{room['id']}_{telegram_id}_{number}"
-
-    success = await debit_user_balance(telegram_id, Decimal(str(room["nominal"])), tx_id)
-    if not success:
-        return JSONResponse({"ok": False, "error": "Payment failed"}, status_code=400)
-
-    room["players"].append({"telegram_id": telegram_id, "number": number})
-    new_balance = await get_user_balance(telegram_id)
-
-    if len(room["players"]) == room["max_players"]:
-        from rooms import run_game_draw
-        asyncio.create_task(run_game_draw(room["id"], bot_app.bot))
-
-    return {"ok": True, "number": number, "balance": float(new_balance),
-            "invite_code": code, "player_count": len(room["players"])}
-
-
-@app.get("/api/private-rooms")
-async def api_private_rooms(telegram_id: int):
-    rooms = []
-    for r in ROOMS.values():
-        if r.get("type") == "private":
-            is_member = any(p["telegram_id"] == telegram_id for p in r["players"])
-            if is_member or r.get("creator_id") == telegram_id:
-                rooms.append({
-                    "id": r["id"], "nominal": r["nominal"],
-                    "max_players": r["max_players"], "winners": r["winners"],
-                    "each_prize": r["each_prize"], "invite_code": r.get("invite_code"),
-                    "player_count": len(r["players"]), "game_started": r["game_started"],
-                })
-    return {"rooms": rooms}
-
-
-# ─────────────────────────────────────────────
-#  STARTUP / SHUTDOWN
-# ─────────────────────────────────────────────
-@app.on_event("startup")
-async def startup():
-    global bot_app
-    await init_db()
-    logger.info("Database initialized")
-
-    bot_app = Application.builder().token(BOT_TOKEN).build()
-    bot_app.add_handler(CommandHandler("start",   cmd_start))
-    bot_app.add_handler(CommandHandler("balance", cmd_balance))
-    bot_app.add_handler(CommandHandler("play",    cmd_play))
-    bot_app.add_handler(CommandHandler("help",    cmd_help))
-
-    setup_payment_handlers(bot_app)
-    setup_room_handlers(bot_app)
-
-    await bot_app.initialize()
-    await bot_app.start()
-
-    webhook_url = f"{WEBHOOK_URL}/webhook/telegram"
-    await bot_app.bot.set_webhook(url=webhook_url, allowed_updates=Update.ALL_TYPES)
-    logger.info(f"Webhook set: {webhook_url}")
-
-
-@app.on_event("shutdown")
-async def shutdown():
-    if bot_app:
-        await bot_app.stop()
-        await bot_app.shutdown()
-    logger.info("Bot stopped")
-
-
-if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=PORT, log_level="info")
+    return {"status": "ok"}
