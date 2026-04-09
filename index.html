@@ -2,381 +2,1830 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#08090E">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#080B16">
 <title>Lucky Number</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--bg-void:#08090E;--bg-base:#0C0E16;--bg-raised:#12151F;--bg-surface:#181C28;--bg-glass:rgba(24,28,40,.65);--bg-glass-heavy:rgba(18,21,31,.85);--gold-300:#FFD54F;--gold-400:#FFCA28;--gold-500:#F0B90B;--gold-600:#D4A00A;--gold-glow:rgba(240,185,11,.35);--gold-soft:rgba(240,185,11,.08);--gold-soft2:rgba(240,185,11,.15);--teal:#2DD4A8;--teal-soft:rgba(45,212,168,.10);--teal-glow:rgba(45,212,168,.30);--red:#FF4D6D;--red-soft:rgba(255,77,109,.10);--green:#34D399;--t1:#F8FAFC;--t2:#94A3B8;--t3:#475569;--t4:#334155;--b1:rgba(255,255,255,.04);--b2:rgba(255,255,255,.08);--b-gold:rgba(240,185,11,.25);--b-teal:rgba(45,212,168,.20);--s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:20px;--s6:24px;--s8:32px;--s10:40px;--r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:20px;--r-2xl:24px;--r-full:9999px;--ff:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif;--fm:'JetBrains Mono','SF Mono',monospace;--shadow-sm:0 2px 8px rgba(0,0,0,.3);--shadow-gold:0 8px 32px rgba(240,185,11,.25);--shadow-teal:0 8px 32px rgba(45,212,168,.20);--shadow-lg:0 16px 48px rgba(0,0,0,.5);--ease:cubic-bezier(.4,0,.2,1);--spring:cubic-bezier(.34,1.56,.64,1);--nav-h:68px;--safe-b:env(safe-area-inset-bottom,0px)}
+/* ═══════════════════════════════════════
+   RESET & FOUNDATION
+   ═══════════════════════════════════════ */
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html{scroll-behavior:smooth}
-body{font-family:var(--ff);background:var(--bg-void);color:var(--t1);line-height:1.5;min-height:100dvh;overflow-x:hidden;padding-bottom:calc(var(--nav-h)+var(--safe-b)+20px);-webkit-font-smoothing:antialiased}
-body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 600px 400px at 15% 20%,rgba(240,185,11,.04) 0%,transparent 70%),radial-gradient(ellipse 500px 500px at 85% 75%,rgba(45,212,168,.03) 0%,transparent 70%);pointer-events:none;z-index:0}
-body::after{content:'';position:fixed;inset:0;opacity:.015;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-repeat:repeat;background-size:128px;pointer-events:none;z-index:0}
-.app{max-width:540px;margin:0 auto;padding:0 var(--s4);position:relative;z-index:1}
-.hdr{display:flex;align-items:center;justify-content:space-between;padding:var(--s4) 0 var(--s3);position:sticky;top:0;z-index:50;background:linear-gradient(to bottom,var(--bg-void) 60%,rgba(8,9,14,.8) 90%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
-.hdr-logo{display:flex;flex-direction:column;gap:2px}
-.hdr-name{font-size:21px;font-weight:900;letter-spacing:-.6px;background:linear-gradient(135deg,var(--t1) 20%,var(--gold-400) 80%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.hdr-sub{font-size:10px;font-weight:600;color:var(--t3);letter-spacing:1.5px;text-transform:uppercase}
-.hdr-right{display:flex;align-items:center;gap:var(--s2)}
-.hdr-bal{display:flex;flex-direction:column;align-items:flex-end;background:var(--bg-glass);border:1px solid var(--b2);border-radius:var(--r-lg);padding:6px var(--s3);cursor:pointer;transition:all .2s var(--ease);backdrop-filter:blur(12px)}
-.hdr-bal:active{transform:scale(.95);border-color:var(--b-gold);background:var(--gold-soft)}
-.hdr-bal-main{font-size:13px;font-weight:800;color:var(--gold-400);font-family:var(--fm);line-height:1.1;letter-spacing:-.5px}
-.hdr-bal-label{font-size:8px;color:var(--t3);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
-.hdr-avatar{width:38px;height:38px;border-radius:var(--r-md);background:var(--bg-glass);border:1px solid var(--b2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:all .15s;backdrop-filter:blur(12px)}
-.hdr-avatar:active{transform:scale(.88);border-color:var(--gold-500)}
-.bnav{position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(8,9,14,.92);backdrop-filter:saturate(180%) blur(24px);-webkit-backdrop-filter:saturate(180%) blur(24px);border-top:1px solid var(--b1);display:flex;align-items:flex-end;justify-content:space-around;padding:0 var(--s2);padding-bottom:var(--safe-b);height:calc(var(--nav-h)+var(--safe-b))}
-.bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:var(--s2) 0;background:none;border:none;cursor:pointer;color:var(--t3);font-family:var(--ff);font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;transition:color .2s;position:relative}
-.bnav-btn.on{color:var(--gold-400)}
-.bnav-btn.on::after{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:24px;height:2px;border-radius:2px;background:var(--gold-500);box-shadow:0 0 12px var(--gold-glow)}
-.bnav-ico{font-size:20px;line-height:1;transition:transform .2s var(--spring)}
-.bnav-btn:active .bnav-ico{transform:scale(.75)}
-.bnav-create{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;cursor:pointer;font-family:var(--ff);font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--gold-500);padding-bottom:var(--s2)}
-.bnav-create-orb{width:52px;height:52px;border-radius:50%;background:linear-gradient(145deg,var(--gold-500),var(--gold-300));display:flex;align-items:center;justify-content:center;font-size:26px;color:var(--bg-void);font-weight:900;box-shadow:var(--shadow-gold),inset 0 1px 0 rgba(255,255,255,.25);transition:all .25s var(--spring);margin-top:-18px;border:3px solid var(--bg-void)}
-.bnav-create:active .bnav-create-orb{transform:scale(.88)}
-.trust{display:flex;align-items:center;justify-content:center;gap:var(--s4);padding:var(--s3) var(--s4);background:linear-gradient(135deg,rgba(45,212,168,.06),rgba(45,212,168,.02));border:1px solid var(--b-teal);border-radius:var(--r-lg);margin-bottom:var(--s5);animation:fadeUp .5s var(--ease) .1s both}
-.trust-i{font-size:11px;font-weight:700;color:var(--teal);display:flex;align-items:center;gap:5px;white-space:nowrap}
-.trust-d{width:3px;height:3px;background:var(--t4);border-radius:50%}
-.hero{position:relative;overflow:hidden;background:linear-gradient(160deg,var(--bg-raised),var(--bg-surface));border:1px solid var(--b-gold);border-radius:var(--r-2xl);padding:var(--s6);margin-bottom:var(--s5);animation:fadeUp .5s var(--ease) .2s both}
-.hero::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold-600),transparent);opacity:.6}
-.hero::after{content:'';position:absolute;top:-50%;right:-30%;width:250px;height:250px;background:radial-gradient(circle,var(--gold-soft),transparent 70%);pointer-events:none;opacity:.5}
-.hero-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:800;color:var(--gold-500);background:var(--gold-soft2);border:1px solid var(--b-gold);padding:4px 10px;border-radius:var(--r-full);letter-spacing:1px;text-transform:uppercase;margin-bottom:var(--s4)}
-.hero-title{font-size:22px;font-weight:900;letter-spacing:-.5px;color:var(--t1);margin-bottom:var(--s5);line-height:1.2;position:relative;z-index:1}
-.hero-steps{display:flex;flex-direction:column;gap:var(--s3);margin-bottom:var(--s5);position:relative;z-index:1}
-.hero-step{display:flex;align-items:center;gap:var(--s3);font-size:13px;font-weight:500;color:var(--t2)}
-.hero-step-n{width:30px;height:30px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;font-family:var(--fm)}
-.hero-step:nth-child(1) .hero-step-n{background:var(--gold-soft2);color:var(--gold-400);border:1px solid var(--b-gold)}
-.hero-step:nth-child(2) .hero-step-n{background:var(--teal-soft);color:var(--teal);border:1px solid var(--b-teal)}
-.hero-step:nth-child(3) .hero-step-n{background:var(--teal-soft);color:var(--teal);border:1px solid var(--b-teal)}
-.hero-step:nth-child(4) .hero-step-n{background:var(--red-soft);color:var(--red);border:1px solid rgba(255,77,109,.2)}
-.hero-step:nth-child(5) .hero-step-n{background:linear-gradient(135deg,var(--gold-500),var(--gold-300));color:var(--bg-void);border:none;box-shadow:var(--shadow-gold)}
-.hero-cta{width:100%;padding:var(--s4);border:none;border-radius:var(--r-lg);background:linear-gradient(135deg,var(--gold-500),var(--gold-300));color:var(--bg-void);font-family:var(--ff);font-size:15px;font-weight:800;cursor:pointer;transition:all .15s;box-shadow:var(--shadow-gold);position:relative;z-index:1}
-.hero-cta:active{transform:scale(.97)}
-.collapse{background:var(--bg-raised);border:1px solid var(--b1);border-radius:var(--r-xl);margin-bottom:var(--s5);overflow:hidden;animation:fadeUp .5s var(--ease) .3s both}
-.collapse-head{width:100%;display:flex;justify-content:space-between;align-items:center;padding:var(--s4);background:none;border:none;cursor:pointer;font-family:var(--ff);font-size:13px;font-weight:700;color:var(--t2);text-align:left}
-.collapse-arrow{font-size:10px;color:var(--t3);transition:transform .3s var(--spring)}
-.collapse-arrow.open{transform:rotate(180deg)}
-.collapse-body{padding:0 var(--s4) var(--s4);display:none}
-.collapse-step{display:flex;align-items:flex-start;gap:var(--s3);padding:var(--s2) 0;font-size:13px;color:var(--t2);line-height:1.6}
-.collapse-n{min-width:22px;height:22px;border-radius:50%;background:var(--gold-soft);border:1px solid var(--b-gold);color:var(--gold-500);font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.collapse-note{font-size:11px;color:var(--teal);font-weight:600;background:var(--teal-soft);border:1px solid var(--b-teal);border-radius:var(--r-md);padding:var(--s3);margin-top:var(--s3);line-height:1.5}
-.sec-hdr{display:flex;align-items:baseline;justify-content:space-between;margin:var(--s6) 0 var(--s4)}
-.sec-title{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--t1)}
-.sec-badge{font-size:10px;font-weight:700;color:var(--t3);background:var(--bg-surface);padding:3px 10px;border-radius:var(--r-full);border:1px solid var(--b1)}
-.sec-label{font-size:10px;font-weight:800;color:var(--t4);letter-spacing:2.5px;text-transform:uppercase;margin:var(--s6) 0 var(--s4);display:flex;align-items:center;gap:var(--s3)}
-.sec-label::after{content:'';flex:1;height:1px;background:linear-gradient(to right,var(--b2),transparent)}
-.rooms{display:flex;flex-direction:column;gap:var(--s4);margin-bottom:var(--s8)}
-.room{position:relative;overflow:hidden;background:var(--bg-raised);border:1px solid var(--b1);border-radius:var(--r-2xl);padding:var(--s5);transition:all .25s var(--ease);box-shadow:var(--shadow-sm);animation:fadeUp .4s var(--ease) both}
-.room::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent)}
-.room.priv{border-color:var(--b-teal)}
-.room:active{transform:scale(.985);border-color:var(--b-gold);box-shadow:var(--shadow-gold)}
-.room-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:var(--s4)}
-.room-amt{font-size:30px;font-weight:900;color:var(--gold-300);font-family:var(--fm);line-height:1;letter-spacing:-1px}
-.room-amt-label{font-size:11px;color:var(--t3);font-weight:600;margin-top:3px}
-.room-tags{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
-.tag{font-size:9px;font-weight:800;padding:3px 8px;border-radius:6px;letter-spacing:.8px;text-transform:uppercase;border:1px solid}
-.tag-players{color:var(--teal);border-color:var(--b-teal);background:var(--teal-soft)}
-.tag-priv{color:var(--gold-400);border-color:var(--b-gold);background:var(--gold-soft)}
-.tag-full{color:var(--red);border-color:rgba(255,77,109,.25);background:var(--red-soft)}
-.room-prize{display:flex;align-items:center;justify-content:space-between;background:var(--bg-surface);border:1px solid var(--b1);padding:var(--s3) var(--s4);border-radius:var(--r-lg);margin-bottom:var(--s3)}
-.room-prize-label{font-size:12px;font-weight:600;color:var(--t2)}
-.room-prize-right{text-align:right}
-.room-prize-val{font-size:15px;font-weight:800;color:var(--gold-300);font-family:var(--fm)}
-.room-prize-sub{font-size:9px;color:var(--t3);font-weight:600}
-.room-mult{font-size:10px;color:var(--t3);text-align:center;padding:var(--s1) 0 var(--s3);border-bottom:1px solid var(--b1);margin-bottom:var(--s3)}
-.dots{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:var(--s4);min-height:34px}
-.dot{width:34px;height:34px;border-radius:50%;background:var(--bg-surface);border:1.5px solid var(--b2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--t4);font-family:var(--fm);transition:all .35s var(--spring)}
-.dot.taken{border-color:rgba(255,255,255,.12);color:var(--t2)}
-.dot.mine{background:linear-gradient(135deg,var(--gold-500),var(--gold-300));border-color:var(--gold-300);color:var(--bg-void);box-shadow:0 0 16px var(--gold-glow);transform:scale(1.12);font-weight:800}
-.room-prog{display:flex;align-items:center;gap:var(--s3);margin-bottom:var(--s4)}
-.prog-track{flex:1;height:3px;background:var(--bg-surface);border-radius:var(--r-full);overflow:hidden}
-.prog-fill{height:100%;border-radius:var(--r-full);background:linear-gradient(90deg,var(--teal),var(--gold-400));transition:width .6s var(--spring);box-shadow:0 0 8px var(--gold-glow);position:relative}
-.prog-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);animation:shimmer 2s infinite}
-@keyframes shimmer{0%{transform:translateX(-100%)}100%{transform:translateX(200%)}}
-.prog-txt{font-size:10px;color:var(--t2);font-family:var(--fm);font-weight:700;min-width:30px;text-align:right}
-.inv-row{display:flex;align-items:center;gap:var(--s2);background:var(--bg-surface);border:1px solid var(--b1);padding:var(--s3);border-radius:var(--r-lg);margin-bottom:var(--s2)}
-.inv-code{font-family:var(--fm);font-size:16px;letter-spacing:4px;color:var(--teal);flex:1;font-weight:700;text-align:center}
-.inv-copy{background:none;border:none;color:var(--t3);cursor:pointer;font-size:16px;padding:4px;border-radius:6px;transition:all .15s;width:30px;height:30px;display:flex;align-items:center;justify-content:center}
-.inv-copy:active{background:var(--gold-soft);color:var(--gold-400);transform:scale(.85)}
-.share-row{display:flex;gap:var(--s2);margin-bottom:var(--s4)}
-.share-btn{flex:1;padding:var(--s3) var(--s2);border-radius:var(--r-md);border:1px solid var(--b1);background:var(--bg-surface);color:var(--t2);font-family:var(--ff);font-size:10px;font-weight:700;cursor:pointer;text-align:center;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:4px;text-transform:uppercase;letter-spacing:.5px}
-.share-btn.tg{border-color:var(--b-teal);color:var(--teal);background:var(--teal-soft)}
-.share-btn.wa{border-color:rgba(87,196,100,.2);color:#57C464;background:rgba(87,196,100,.06)}
-.share-btn:active{transform:translateY(1px)}
-.cta{width:100%;padding:15px;border:none;border-radius:var(--r-lg);background:linear-gradient(135deg,var(--gold-500),var(--gold-300));color:var(--bg-void);font-family:var(--ff);font-size:14px;font-weight:800;cursor:pointer;transition:all .15s;min-height:50px;box-shadow:var(--shadow-gold),inset 0 1px 0 rgba(255,255,255,.2);position:relative;overflow:hidden}
-.cta::before{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(255,255,255,.15),transparent 50%)}
-.cta:active{transform:scale(.97) translateY(1px)}
-.cta:disabled{opacity:.35;cursor:not-allowed;background:var(--bg-surface);color:var(--t3);box-shadow:none;transform:none}
-.cta.teal{background:linear-gradient(135deg,var(--teal),#00B894);box-shadow:var(--shadow-teal),inset 0 1px 0 rgba(255,255,255,.15)}
-.ov{display:none;position:fixed;inset:0;background:rgba(4,5,8,.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);z-index:500;align-items:flex-end;justify-content:center}
-.ov.on{display:flex}
-.sht{background:linear-gradient(180deg,var(--bg-raised),var(--bg-surface));border-radius:var(--r-2xl) var(--r-2xl) 0 0;border:1px solid var(--b2);border-bottom:none;padding:0 var(--s5) calc(var(--s6)+var(--safe-b));width:100%;max-width:540px;max-height:92vh;overflow-y:auto;overscroll-behavior:contain;transform:translateY(100%);transition:transform .35s var(--spring);box-shadow:var(--shadow-lg)}
-.ov.on .sht{transform:translateY(0)}
-.sht-grip{width:36px;height:4px;background:var(--t4);border-radius:var(--r-full);margin:var(--s3) auto;opacity:.4}
-.sht-hdr{display:flex;align-items:center;justify-content:space-between;padding:var(--s3) 0 var(--s5);position:sticky;top:0;z-index:10;background:linear-gradient(to bottom,var(--bg-raised) 85%,transparent);backdrop-filter:blur(8px)}
-.sht-title{font-size:18px;font-weight:800;letter-spacing:-.3px}
-.sht-x{width:34px;height:34px;border-radius:50%;background:var(--bg-surface);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:var(--t3);transition:all .2s}
-.sht-x:active{background:var(--red-soft);color:var(--red);transform:rotate(90deg) scale(.9)}
-.f-label{font-size:10px;font-weight:800;color:var(--t4);letter-spacing:2px;text-transform:uppercase;margin-bottom:var(--s3);display:block}
-.chips{display:flex;flex-wrap:wrap;gap:var(--s2);margin-bottom:var(--s5)}
-.chip{padding:var(--s3) var(--s4);border-radius:var(--r-md);border:1px solid var(--b2);background:var(--bg-surface);color:var(--t2);font-family:var(--ff);font-size:13px;font-weight:700;cursor:pointer;transition:all .12s;min-height:46px;display:flex;align-items:center;justify-content:center;flex:1;min-width:68px}
-.chip.on{background:var(--gold-soft2);border-color:var(--b-gold);color:var(--gold-400);box-shadow:0 0 16px var(--gold-glow)}
+:root{
+  --gold:#E2B34F;--gold-l:#F5D280;--gold-d:#C4982F;--gold-bg:rgba(226,179,79,.1);--gold-bg2:rgba(226,179,79,.06);
+  --green:#34D399;--green-d:#22B780;--green-bg:rgba(52,211,153,.1);
+  --red:#F06060;--red-bg:rgba(240,96,96,.1);
+  --purple:#A78BFA;--purple-bg:rgba(167,139,250,.08);
+  --bg0:#060912;--bg1:#0C1020;--bg2:#111730;--bg3:#182040;--bg4:#1E2850;
+  --border:rgba(255,255,255,.06);--border2:rgba(255,255,255,.1);
+  --t1:#F0F2F8;--t2:#B0B8D0;--t3:#6B7394;
+  --nav-h:72px;--safe-b:env(safe-area-inset-bottom,0px);
+  --radius:16px;--radius-s:10px;--radius-xs:6px;
+}
+html{background:var(--bg0);height:100%}
+body{
+  font-family:'Outfit',system-ui,-apple-system,sans-serif;
+  background:var(--bg0);color:var(--t1);
+  min-height:100%;overflow-x:hidden;
+  padding-bottom:calc(var(--nav-h) + var(--safe-b) + 70px);
+  -webkit-font-smoothing:antialiased;
+}
+
+/* Subtle grain overlay */
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.025;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:0;height:0}
+
+/* ═══ ROOM CREATED OVERLAY ═══ */
+.created-overlay{
+  position:fixed;inset:0;z-index:9000;
+  background:rgba(0,0,0,.75);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  display:none;align-items:center;justify-content:center;padding:20px;
+}
+.created-overlay.show{display:flex}
+.created-card{
+  background:var(--bg1);border:1px solid var(--border2);border-radius:20px;
+  padding:28px 24px;width:100%;max-width:360px;text-align:center;
+  animation:fadeScale .35s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes fadeScale{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+.created-emoji{font-size:48px;margin-bottom:12px}
+.created-title{font-size:20px;font-weight:800;margin-bottom:4px}
+.created-sub{font-size:13px;color:var(--t2);margin-bottom:20px}
+.created-code-wrap{
+  background:var(--bg2);border:1px solid var(--border2);border-radius:14px;
+  padding:16px;margin-bottom:16px;position:relative;
+}
+.created-code-label{font-size:10px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:2px;margin-bottom:8px}
+.created-code{
+  font-family:'JetBrains Mono',monospace;font-size:32px;font-weight:800;
+  letter-spacing:6px;color:var(--gold-l);user-select:all;
+}
+.created-copy-btn{
+  margin-top:12px;width:100%;padding:12px;border:1px solid rgba(226,179,79,.25);
+  background:var(--gold-bg);border-radius:var(--radius-s);
+  font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;
+  color:var(--gold);cursor:pointer;transition:all .15s;
+}
+.created-copy-btn:active{transform:scale(.97);background:rgba(226,179,79,.18)}
+.created-share-row{display:flex;gap:8px;margin-bottom:16px}
+.created-share-btn{
+  flex:1;padding:12px 8px;border-radius:var(--radius-s);
+  border:1px solid var(--border);background:var(--bg2);
+  font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;
+  color:var(--t2);cursor:pointer;transition:all .15s;text-align:center;
+}
+.created-share-btn:active{transform:scale(.97);background:var(--bg3)}
+.created-enter-btn{
+  width:100%;padding:14px;border:none;border-radius:var(--radius-s);
+  background:linear-gradient(135deg,var(--gold),var(--gold-d));
+  font-family:'Outfit',sans-serif;font-size:15px;font-weight:800;
+  color:#0A0F1A;cursor:pointer;transition:all .15s;
+  box-shadow:0 4px 20px rgba(226,179,79,.3);
+}
+.created-enter-btn:active{transform:scale(.98);box-shadow:0 2px 10px rgba(226,179,79,.2)}
+.created-close-link{
+  display:block;margin-top:12px;font-size:13px;color:var(--t3);
+  cursor:pointer;transition:color .15s;
+}
+.created-close-link:active{color:var(--t2)}
+
+/* ═══════════════════════════════════════
+   LAYOUT
+   ═══════════════════════════════════════ */
+.app{max-width:480px;margin:0 auto;padding:0 14px;position:relative;z-index:1}
+
+/* ═══════════════════════════════════════
+   HEADER
+   ═══════════════════════════════════════ */
+.header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 16px;margin:10px 0 6px;
+  background:linear-gradient(135deg,var(--bg2),var(--bg3));
+  border:1px solid var(--border);border-radius:20px;
+  position:relative;overflow:hidden;
+}
+.header::before{
+  content:'';position:absolute;top:-50%;right:-30%;width:200px;height:200px;
+  background:radial-gradient(circle,rgba(226,179,79,.06),transparent 70%);pointer-events:none;
+}
+.logo-group{display:flex;align-items:center;gap:12px}
+.logo-icon{
+  width:42px;height:42px;border-radius:12px;
+  background:linear-gradient(135deg,var(--gold),var(--gold-d));
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;font-weight:800;color:var(--bg0);
+  box-shadow:0 4px 16px rgba(226,179,79,.25);
+}
+.logo-text{display:flex;flex-direction:column}
+.logo-name{font-size:17px;font-weight:700;letter-spacing:-.3px;line-height:1.2}
+.logo-tag{font-size:10px;color:var(--t3);font-weight:500;text-transform:uppercase;letter-spacing:1.2px;margin-top:2px}
+.header-right{display:flex;align-items:center;gap:10px}
+.balance-chip{
+  display:flex;align-items:center;gap:6px;
+  background:var(--gold-bg);border:1px solid rgba(226,179,79,.15);
+  border-radius:12px;padding:8px 14px;cursor:pointer;
+  transition:all .2s;
+}
+.balance-chip:active{transform:scale(.96);background:var(--gold-bg2)}
+.balance-amount{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--gold-l)}
+.balance-cur{font-size:10px;color:var(--t3);font-weight:500}
+.avatar-btn{
+  width:38px;height:38px;border-radius:12px;
+  background:linear-gradient(135deg,var(--bg3),var(--bg4));
+  border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;
+  font-size:18px;cursor:pointer;transition:all .2s;
+}
+.avatar-btn:active{transform:scale(.92)}
+
+/* ═══════════════════════════════════════
+   TRUST BAR
+   ═══════════════════════════════════════ */
+.trust-section{margin:8px 0 4px}
+.trust-card{
+  background:var(--green-bg);border:1px solid rgba(52,211,153,.12);
+  border-radius:var(--radius);padding:12px 16px;
+  display:flex;align-items:center;gap:10px;margin-bottom:8px;
+}
+.trust-icon{font-size:22px;flex-shrink:0}
+.trust-text{font-size:13px;color:var(--t2);line-height:1.4}
+.trust-text b{color:var(--green);font-weight:600}
+.trust-bar{
+  background:var(--gold-bg);border:1px solid rgba(226,179,79,.1);
+  border-radius:var(--radius-s);padding:10px 14px;
+  font-size:12px;color:var(--gold);text-align:center;line-height:1.4;
+}
+
+/* ═══════════════════════════════════════
+   SECTION TITLES
+   ═══════════════════════════════════════ */
+.section-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 0 10px;
+}
+.section-title{font-size:19px;font-weight:700;letter-spacing:-.3px}
+.section-action{
+  font-size:12px;color:var(--gold);font-weight:600;
+  background:var(--gold-bg);border:1px solid rgba(226,179,79,.12);
+  border-radius:8px;padding:6px 12px;cursor:pointer;
+  transition:all .2s;
+}
+.section-action:active{transform:scale(.95)}
+
+/* ═══════════════════════════════════════
+   ROOM CARDS
+   ═══════════════════════════════════════ */
+.rooms-list{display:flex;flex-direction:column;gap:10px}
+.room-card{
+  background:linear-gradient(135deg,var(--bg2) 0%,var(--bg3) 100%);
+  border:1px solid var(--border);border-radius:var(--radius);
+  padding:16px;cursor:pointer;transition:all .25s ease;
+  position:relative;overflow:hidden;
+}
+.room-card:active{transform:scale(.98);border-color:var(--border2)}
+.room-card::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(226,179,79,.15),transparent);
+}
+.room-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px}
+.room-nominal-group{display:flex;flex-direction:column;gap:2px}
+.room-nominal{
+  font-family:'JetBrains Mono',monospace;
+  font-size:28px;font-weight:800;color:var(--gold-l);
+  letter-spacing:1px;line-height:1;
+}
+.room-nominal-label{font-size:11px;color:var(--t3);font-weight:500}
+.room-badge{
+  display:flex;align-items:center;gap:4px;
+  background:var(--green-bg);border:1px solid rgba(52,211,153,.15);
+  border-radius:8px;padding:5px 10px;
+  font-size:12px;font-weight:600;color:var(--green);
+}
+.room-badge.full{background:var(--red-bg);border-color:rgba(240,96,96,.15);color:var(--red)}
+
+.room-prize-row{
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--bg1);border-radius:var(--radius-s);
+  padding:10px 14px;margin-bottom:10px;
+}
+.room-prize-label{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--t2)}
+.room-prize-amount{
+  font-family:'JetBrains Mono',monospace;
+  font-size:15px;font-weight:700;color:var(--gold);
+}
+.room-prize-amount .striked{
+  text-decoration:line-through;color:var(--t3);font-weight:400;font-size:12px;margin-right:4px;
+}
+
+.room-progress{
+  width:100%;height:4px;background:var(--bg1);border-radius:4px;overflow:hidden;margin-bottom:8px;
+}
+.room-progress-fill{
+  height:100%;border-radius:4px;
+  background:linear-gradient(90deg,var(--gold-d),var(--gold-l));
+  transition:width .4s ease;
+}
+.room-meta{
+  display:flex;align-items:center;justify-content:space-between;
+  font-size:11px;color:var(--t3);
+}
+.room-meta-item{display:flex;align-items:center;gap:4px}
+
+/* Active room (player is in) */
+.room-card.im-in{border-color:rgba(226,179,79,.2);box-shadow:0 0 0 1px rgba(226,179,79,.08)}
+.room-you-tag{
+  display:inline-flex;align-items:center;gap:4px;
+  background:var(--gold-bg);border:1px solid rgba(226,179,79,.2);
+  border-radius:6px;padding:4px 10px;margin-bottom:10px;
+  font-size:11px;font-weight:700;color:var(--gold);
+}
+.room-badge.live{background:var(--gold-bg);border-color:rgba(226,179,79,.2);color:var(--gold);animation:pulseBadge 1.5s infinite}
+.room-badge.done{background:var(--green-bg);border-color:rgba(52,211,153,.15);color:var(--green)}
+@keyframes pulseBadge{0%,100%{opacity:1}50%{opacity:.5}}
+
+/* ═══════════════════════════════════════
+   BOTTOM NAV
+   ═══════════════════════════════════════ */
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;z-index:100;
+  background:linear-gradient(180deg,rgba(6,9,18,0) 0%,var(--bg0) 20%);
+  padding:0 0 var(--safe-b);
+}
+.nav-inner{
+  max-width:480px;margin:0 auto;
+  display:flex;align-items:flex-end;justify-content:space-around;
+  padding:0 6px 6px;
+}
+.nav-item{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:8px 4px 6px;cursor:pointer;transition:all .2s;flex:1;
+  -webkit-user-select:none;user-select:none;
+}
+.nav-item .nav-icon{
+  width:28px;height:28px;display:flex;align-items:center;justify-content:center;
+  font-size:18px;border-radius:10px;transition:all .2s;
+}
+.nav-item .nav-label{font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;transition:all .2s}
+.nav-item.active .nav-icon{background:var(--gold-bg);color:var(--gold)}
+.nav-item.active .nav-label{color:var(--gold)}
+.nav-badge{
+  position:absolute;top:2px;right:6px;
+  min-width:18px;height:18px;padding:0 5px;
+  border-radius:9px;background:var(--red);
+  font-size:10px;font-weight:800;color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 2px 8px rgba(240,96,96,.4);
+  animation:badgePop .3s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes badgePop{from{transform:scale(0)}to{transform:scale(1)}}
+.nav-item:active{transform:scale(.9)}
+
+/* Create button — center fab */
+.nav-create{
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  cursor:pointer;flex:1;padding:0 4px 6px;-webkit-user-select:none;
+}
+.nav-create-btn{
+  width:52px;height:52px;border-radius:16px;
+  background:linear-gradient(135deg,var(--gold),var(--gold-d));
+  display:flex;align-items:center;justify-content:center;
+  font-size:26px;font-weight:300;color:var(--bg0);
+  box-shadow:0 6px 24px rgba(226,179,79,.3);
+  margin-top:-18px;transition:all .2s;
+}
+.nav-create:active .nav-create-btn{transform:scale(.9)}
+.nav-create .nav-label{font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.5px}
+
+/* ═══════════════════════════════════════
+   DEPOSIT BAR
+   ═══════════════════════════════════════ */
+.deposit-bar{
+  position:fixed;bottom:calc(var(--nav-h) + var(--safe-b) + 2px);
+  left:50%;transform:translateX(-50%);
+  width:calc(100% - 28px);max-width:452px;z-index:99;
+}
+.deposit-btn{
+  width:100%;padding:15px;border:none;border-radius:14px;
+  background:linear-gradient(135deg,#7C3AED,#9F5AFF);
+  color:#fff;font-family:'Outfit',sans-serif;
+  font-size:15px;font-weight:700;letter-spacing:.5px;
+  text-transform:uppercase;cursor:pointer;
+  box-shadow:0 6px 24px rgba(124,58,237,.35);
+  transition:all .2s;
+}
+.deposit-btn:active{transform:scale(.97);box-shadow:0 2px 12px rgba(124,58,237,.25)}
+
+/* ═══════════════════════════════════════
+   TAB VIEWS (hidden by default)
+   ═══════════════════════════════════════ */
+.tab-view{display:none;animation:fadeUp .25s ease}
+.tab-view.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ═══════════════════════════════════════
+   OVERLAYS & MODALS
+   ═══════════════════════════════════════ */
+.overlay{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(4,6,14,.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  display:none;opacity:0;transition:opacity .25s;
+}
+.overlay.show{display:flex;flex-direction:column;opacity:1}
+.overlay-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 18px;border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:10;
+  background:rgba(12,16,32,.9);backdrop-filter:blur(8px);
+}
+.overlay-title{font-size:17px;font-weight:700}
+.overlay-close{
+  width:34px;height:34px;border-radius:10px;
+  background:var(--bg3);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;cursor:pointer;color:var(--t2);transition:all .2s;
+}
+.overlay-close:active{transform:scale(.9)}
+.overlay-body{flex:1;overflow-y:auto;padding:16px 18px 40px;-webkit-overflow-scrolling:touch}
+
+/* ═══════════════════════════════════════
+   CREATE ROOM MODAL
+   ═══════════════════════════════════════ */
+.modal-sheet{
+  position:fixed;bottom:0;left:0;right:0;z-index:250;
+  transform:translateY(100%);transition:transform .35s cubic-bezier(.32,.72,0,1);
+}
+.modal-sheet.show{transform:translateY(0)}
+.modal-backdrop{
+  position:fixed;inset:0;z-index:249;
+  background:rgba(4,6,14,.7);backdrop-filter:blur(6px);
+  display:none;opacity:0;transition:opacity .25s;
+}
+.modal-backdrop.show{display:block;opacity:1}
+.modal-content{
+  background:var(--bg1);border-radius:24px 24px 0 0;
+  border-top:1px solid var(--border2);
+  padding:0 18px calc(var(--safe-b) + 20px);
+  max-height:85vh;overflow-y:auto;
+}
+.modal-handle{
+  width:36px;height:4px;border-radius:4px;background:var(--bg4);
+  margin:10px auto 16px;
+}
+.modal-section-title{font-size:14px;font-weight:600;color:var(--t2);margin:18px 0 10px}
+
+/* Type toggle */
+.type-toggle{
+  display:flex;background:var(--bg2);border-radius:12px;padding:3px;
+  border:1px solid var(--border);margin-bottom:6px;
+}
+.type-toggle-btn{
+  flex:1;padding:10px;border:none;border-radius:10px;
+  background:transparent;color:var(--t3);
+  font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;
+  cursor:pointer;transition:all .2s;
+}
+.type-toggle-btn.active{background:var(--bg4);color:var(--t1);box-shadow:0 2px 8px rgba(0,0,0,.2)}
+
+/* Chip selectors */
+.chip-row{display:flex;flex-wrap:wrap;gap:8px}
+.chip{
+  padding:10px 16px;border-radius:10px;
+  background:var(--bg2);border:1.5px solid var(--border);
+  font-family:'JetBrains Mono',monospace;
+  font-size:13px;font-weight:600;color:var(--t2);
+  cursor:pointer;transition:all .2s;
+}
 .chip:active{transform:scale(.95)}
-.prev{background:linear-gradient(135deg,var(--gold-soft),transparent);border:1px solid var(--b-gold);border-radius:var(--r-xl);padding:var(--s5);margin:var(--s5) 0;position:relative;overflow:hidden}
-.prev::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold-600),transparent);opacity:.4}
-.prev-r{display:flex;justify-content:space-between;align-items:center;padding:var(--s1) 0}
-.prev-k{font-size:12px;color:var(--t2)}
-.prev-v{font-size:13px;font-weight:800;font-family:var(--fm)}
-.prev-v.gold{color:var(--gold-400)}.prev-v.teal{color:var(--teal)}.prev-v.red{color:var(--red)}
-.prev-div{height:1px;background:var(--b1);margin:var(--s3) 0}
-.code-in{width:100%;padding:var(--s5);background:var(--bg-surface);border:1.5px solid var(--b2);border-radius:var(--r-xl);color:var(--t1);font-family:var(--fm);font-size:24px;letter-spacing:10px;text-transform:uppercase;text-align:center;margin-bottom:var(--s5);outline:none;transition:all .25s;font-weight:700}
-.code-in:focus{border-color:var(--gold-500);box-shadow:0 0 0 3px var(--gold-soft2),var(--shadow-gold);background:var(--bg-raised)}
-.code-in::placeholder{color:var(--t4);letter-spacing:5px;font-size:16px}
-.cab{text-align:center;padding:var(--s5) 0}
-.cab-icon{width:76px;height:76px;border-radius:var(--r-xl);background:linear-gradient(135deg,var(--gold-soft2),var(--gold-soft));border:1px solid var(--b-gold);margin:0 auto var(--s4);display:flex;align-items:center;justify-content:center;font-size:34px;box-shadow:var(--shadow-gold);position:relative;overflow:hidden}
-.cab-icon::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.15),transparent);opacity:.5}
-.cab-id{font-family:var(--fm);font-size:11px;color:var(--t4);margin-bottom:var(--s6);letter-spacing:1px;background:var(--bg-surface);padding:3px 10px;border-radius:6px;display:inline-block;border:1px solid var(--b1)}
-.cab-bal{font-size:32px;font-weight:900;color:var(--gold-300);font-family:var(--fm);letter-spacing:-1px;line-height:1;margin-bottom:2px;text-shadow:0 0 40px var(--gold-glow)}
-.cab-bal-unit{font-size:14px;color:var(--t2);margin-bottom:2px;font-weight:600}
-.cab-bal-label{font-size:10px;color:var(--t4);letter-spacing:3px;text-transform:uppercase;margin-bottom:var(--s5);font-weight:700}
-.cab-pay{background:var(--bg-surface);border:1px solid var(--b1);border-radius:var(--r-lg);padding:var(--s4);margin-bottom:var(--s4);text-align:left}
-.cab-pay-title{font-size:12px;font-weight:800;color:var(--t2);margin-bottom:var(--s3)}
-.cab-pay-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:12px}
-.cab-pay-k{color:var(--t3)}.cab-pay-v{color:var(--t1);font-weight:700;font-family:var(--fm)}
-.cab-pay-v.green{color:var(--green)}.cab-pay-v.red{color:var(--red)}
-.cab-pay-note{font-size:10px;color:var(--t3);margin-top:var(--s2);line-height:1.5;padding-top:var(--s2);border-top:1px solid var(--b1)}
-.cab-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--s3)}
-.cab-btn{padding:var(--s4);border-radius:var(--r-lg);border:1px solid var(--b1);background:var(--bg-surface);color:var(--t1);font-family:var(--ff);font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;text-align:center;min-height:52px;display:flex;align-items:center;justify-content:center;gap:var(--s2)}
-.cab-btn:active{transform:scale(.97)}
-.cab-btn.gold{background:var(--gold-soft2);border-color:var(--b-gold);color:var(--gold-400)}
-.cab-btn.red{background:var(--red-soft);border-color:rgba(255,77,109,.2);color:var(--red);grid-column:1/-1;margin-top:var(--s2)}
-.cab-support{margin-top:var(--s6);font-size:11px;color:var(--t4)}
-.game-ov{display:none;position:fixed;inset:0;background:rgba(4,5,8,.97);z-index:900;align-items:center;justify-content:center;padding:var(--s5)}
-.game-ov.on{display:flex}
-.game-box{background:linear-gradient(180deg,var(--bg-raised),var(--bg-surface));border:1px solid var(--b2);border-radius:var(--r-2xl);padding:var(--s6);width:100%;max-width:420px;max-height:92vh;overflow-y:auto;position:relative;box-shadow:var(--shadow-lg);transform:scale(.92) translateY(20px);opacity:0;transition:all .4s var(--spring)}
-.game-ov.on .game-box{transform:scale(1) translateY(0);opacity:1}
-.game-box::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold-500),transparent);opacity:.5}
-.game-hdr{text-align:center;margin-bottom:var(--s5)}
-.game-title{font-size:17px;font-weight:800;color:var(--t1);margin-bottom:2px}
-.game-sub{font-size:12px;color:var(--t2);font-weight:500}
-.spin-wrap{display:flex;justify-content:center;margin:var(--s6) 0}
-.spin-outer{width:130px;height:130px;border-radius:50%;background:conic-gradient(from 0deg,transparent,var(--gold-soft2),transparent);display:flex;align-items:center;justify-content:center;animation:spinPulse 3s ease-in-out infinite}
-@keyframes spinPulse{0%,100%{opacity:.4;transform:scale(1) rotate(0)}50%{opacity:1;transform:scale(1.06) rotate(180deg)}}
-.spin-ring{width:100px;height:100px;border-radius:50%;background:var(--bg-void);border:2px solid var(--b-gold);display:flex;align-items:center;justify-content:center;font-size:42px;font-weight:900;font-family:var(--fm);color:var(--gold-400);z-index:2;box-shadow:inset 0 2px 12px rgba(0,0,0,.5),0 0 24px var(--gold-glow);transition:all .3s}
-.spin-ring.go{animation:spinGo .3s linear infinite;border-style:dashed;border-color:var(--gold-500)}
-@keyframes spinGo{to{transform:rotate(360deg)}}
-.ptiles{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:var(--s5) 0}
-.ptile{aspect-ratio:1;border-radius:var(--r-md);background:var(--bg-surface);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;font-family:var(--fm);color:var(--t4);transition:all .3s var(--spring)}
-.ptile.me{color:var(--gold-400);border-color:var(--b-gold);background:var(--gold-soft2);box-shadow:0 0 12px var(--gold-glow)}
-.ptile.win{background:linear-gradient(135deg,var(--gold-500),var(--gold-300));color:var(--bg-void);border:none;transform:scale(1.12);box-shadow:0 0 24px var(--gold-glow);z-index:10;animation:winPop .6s var(--spring)}
-@keyframes winPop{0%{transform:scale(.4) rotate(-15deg);opacity:0}60%{transform:scale(1.2) rotate(5deg)}100%{transform:scale(1.12) rotate(0);opacity:1}}
-.game-status{font-size:13px;color:var(--t2);text-align:center;margin:var(--s4) 0;line-height:1.6;min-height:40px;display:flex;align-items:center;justify-content:center;font-weight:600}
-.result{background:linear-gradient(145deg,var(--gold-soft2),rgba(240,185,11,.02));border:1px solid var(--b-gold);border-radius:var(--r-xl);padding:var(--s5);text-align:center;margin:var(--s5) 0;animation:resultIn .5s var(--spring)}
-@keyframes resultIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
-.result-title{font-size:12px;font-weight:800;color:var(--gold-500);margin-bottom:var(--s3);letter-spacing:2px;text-transform:uppercase}
-.result-row{font-size:12px;color:var(--t2);padding:3px 0;display:flex;justify-content:space-between}
-.result-row b{color:var(--t1);font-weight:700}
-.result-win{font-size:26px;font-weight:900;color:var(--gold-300);margin-top:var(--s4);font-family:var(--fm);text-shadow:0 0 24px var(--gold-glow)}
-.result-win-unit{font-size:14px;color:var(--t2);font-weight:600}
-.hist{background:var(--bg-raised);border:1px solid var(--b1);border-radius:var(--r-xl);padding:var(--s4);margin-bottom:var(--s3);animation:fadeUp .3s var(--ease) both}
-.hist-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--s2)}
-.hist-date{font-size:11px;color:var(--t3);font-family:var(--fm)}
-.hist-win{font-size:13px;font-weight:800;color:var(--gold-400);font-family:var(--fm);background:var(--gold-soft);padding:2px 8px;border-radius:var(--r-full);border:1px solid var(--b-gold)}
-.hist-loss{font-size:12px;color:var(--t4);font-weight:600}
-.hist-detail{font-size:11px;color:var(--t2);line-height:1.8;font-family:var(--fm)}
-.win-toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);z-index:9999;max-width:300px;width:88%;background:linear-gradient(145deg,var(--gold-500),var(--gold-300));color:var(--bg-void);padding:var(--s6) var(--s8);border-radius:var(--r-2xl);font-weight:900;text-align:center;box-shadow:0 24px 64px rgba(0,0,0,.5),0 0 80px var(--gold-glow);pointer-events:none;transition:all .4s var(--spring);opacity:0}
-.win-toast.show{transform:translate(-50%,-50%) scale(1);opacity:1}
-.win-toast-amt{font-size:28px;font-weight:900;font-family:var(--fm);margin:var(--s2) 0;letter-spacing:-.5px}
-.win-toast-unit{font-size:14px;opacity:.85;font-weight:700}
-.notif{position:fixed;bottom:calc(var(--nav-h)+var(--safe-b)+8px);left:var(--s4);right:var(--s4);max-width:480px;margin:0 auto;background:var(--bg-glass-heavy);border:1px solid var(--b2);border-radius:var(--r-lg);padding:var(--s4);font-size:13px;font-weight:700;z-index:8000;transform:translateY(12px);opacity:0;transition:all .25s var(--ease);pointer-events:none;text-align:center;backdrop-filter:blur(16px)}
-.notif.show{transform:translateY(0);opacity:1}
-.notif.ok{border-color:var(--b-teal);color:var(--teal)}
-.notif.err{border-color:rgba(255,77,109,.3);color:var(--red)}
-.empty{text-align:center;padding:var(--s10) var(--s5);color:var(--t4)}
-.empty-ico{font-size:44px;margin-bottom:var(--s4);opacity:.4}
-.empty-t{font-size:16px;font-weight:800;color:var(--t2);margin-bottom:var(--s2)}
-.empty-s{font-size:13px;line-height:1.6;max-width:240px;margin:0 auto}
-#confetti{position:fixed;inset:0;z-index:9998;pointer-events:none}
-@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-@media(max-width:380px){.ptiles{grid-template-columns:repeat(4,1fr)}.room-amt{font-size:24px}.cab-bal{font-size:28px}}
-@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+.chip.selected{
+  border-color:var(--gold);color:var(--gold-l);
+  background:var(--gold-bg);box-shadow:0 0 16px rgba(226,179,79,.1);
+}
+.player-chip{
+  width:52px;height:52px;border-radius:14px;
+  background:var(--bg2);border:1.5px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--t2);
+  cursor:pointer;transition:all .2s;
+}
+.player-chip:active{transform:scale(.95)}
+.player-chip.selected{
+  border-color:var(--gold);color:var(--gold-l);
+  background:var(--gold-bg);
+}
+
+/* Prize preview */
+.prize-preview{
+  background:linear-gradient(135deg,var(--bg2),var(--bg3));
+  border:1px solid var(--border);border-radius:var(--radius);
+  padding:16px;margin:16px 0;
+}
+.prize-preview-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:6px 0;
+}
+.prize-preview-row+.prize-preview-row{border-top:1px solid var(--border)}
+.prize-preview-label{font-size:12px;color:var(--t3)}
+.prize-preview-val{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600}
+.prize-preview-val.gold{color:var(--gold)}
+.prize-preview-val.green{color:var(--green)}
+
+.modal-submit{
+  width:100%;padding:16px;border:none;border-radius:14px;
+  background:linear-gradient(135deg,var(--gold),var(--gold-d));
+  color:var(--bg0);font-family:'Outfit',sans-serif;
+  font-size:15px;font-weight:700;letter-spacing:.3px;
+  cursor:pointer;margin-top:12px;transition:all .2s;
+  box-shadow:0 4px 20px rgba(226,179,79,.25);
+}
+.modal-submit:active{transform:scale(.97)}
+.modal-submit:disabled{opacity:.4;pointer-events:none}
+
+/* ═══════════════════════════════════════
+   GAME VIEW OVERLAY
+   ═══════════════════════════════════════ */
+.game-overlay{
+  position:fixed;inset:0;z-index:300;
+  background:var(--bg0);display:none;
+  flex-direction:column;
+}
+.game-overlay.show{display:flex}
+.game-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 18px;border-bottom:1px solid var(--border);
+}
+.game-back{
+  width:36px;height:36px;border-radius:10px;background:var(--bg3);
+  border:1px solid var(--border);display:flex;align-items:center;justify-content:center;
+  font-size:18px;cursor:pointer;color:var(--t2);
+}
+.game-back:active{transform:scale(.9)}
+.game-title{font-size:16px;font-weight:700}
+.game-status-chip{
+  font-size:11px;font-weight:600;padding:5px 10px;border-radius:8px;
+  background:var(--green-bg);color:var(--green);border:1px solid rgba(52,211,153,.15);
+}
+.game-body{flex:1;overflow-y:auto;padding:16px 18px 40px}
+
+.game-info-bar{
+  display:flex;justify-content:space-around;
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);
+  padding:14px;margin-bottom:16px;
+}
+.game-info-item{display:flex;flex-direction:column;align-items:center;gap:3px}
+.game-info-item .gi-val{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--gold)}
+.game-info-item .gi-label{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px}
+
+/* Player slots */
+.players-grid{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.player-slot{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;border-radius:var(--radius-s);
+  background:var(--bg2);border:1px solid var(--border);
+  transition:all .3s;
+}
+.player-slot.filled{border-color:var(--border2)}
+.player-slot.you{border-color:rgba(226,179,79,.2);background:var(--gold-bg2)}
+.player-slot.winner{border-color:rgba(52,211,153,.25);background:var(--green-bg)}
+.player-slot.loser{opacity:.5}
+.player-left{display:flex;align-items:center;gap:10px}
+.player-avatar{
+  width:32px;height:32px;border-radius:8px;
+  background:var(--bg3);display:flex;align-items:center;justify-content:center;
+  font-size:14px;
+}
+.player-name{font-size:13px;font-weight:600}
+.player-number{
+  font-family:'JetBrains Mono',monospace;
+  font-size:18px;font-weight:700;color:var(--gold);
+  min-width:40px;text-align:center;
+}
+.player-number.spinning{animation:numSpin .1s linear infinite;color:var(--t3)}
+@keyframes numSpin{
+  0%{content:'';opacity:.3}50%{opacity:1}100%{opacity:.3}
+}
+.player-result{font-size:12px;font-weight:600;padding:3px 8px;border-radius:6px}
+.player-result.win{background:var(--green-bg);color:var(--green)}
+.player-result.lose{background:var(--red-bg);color:var(--red)}
+
+.game-join-btn{
+  width:100%;padding:16px;border:none;border-radius:14px;
+  background:linear-gradient(135deg,var(--gold),var(--gold-d));
+  color:var(--bg0);font-family:'Outfit',sans-serif;
+  font-size:15px;font-weight:700;cursor:pointer;
+  transition:all .2s;
+  box-shadow:0 4px 20px rgba(226,179,79,.25);
+}
+.game-join-btn:active{transform:scale(.97)}
+.game-join-btn:disabled{opacity:.4;pointer-events:none}
+
+/* ═══════════════════════════════════════
+   CABINET OVERLAY
+   ═══════════════════════════════════════ */
+.cab-stat-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;
+}
+.cab-stat{
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-s);
+  padding:14px;display:flex;flex-direction:column;gap:4px;
+}
+.cab-stat .cs-val{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--gold)}
+.cab-stat .cs-label{font-size:11px;color:var(--t3);font-weight:500}
+.cab-balance-card{
+  background:linear-gradient(135deg,var(--bg3),var(--bg4));
+  border:1px solid rgba(226,179,79,.12);border-radius:var(--radius);
+  padding:20px;margin-bottom:16px;text-align:center;
+}
+.cab-balance-label{font-size:12px;color:var(--t3);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px}
+.cab-balance-amount{
+  font-family:'JetBrains Mono',monospace;
+  font-size:32px;font-weight:800;color:var(--gold-l);margin-bottom:2px;
+}
+.cab-balance-sub{font-size:12px;color:var(--t3)}
+.cab-actions{display:flex;gap:8px;margin-bottom:20px}
+.cab-action-btn{
+  flex:1;padding:14px;border:none;border-radius:12px;
+  font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;cursor:pointer;
+  transition:all .2s;
+}
+.cab-action-btn.deposit{background:linear-gradient(135deg,#7C3AED,#9F5AFF);color:#fff}
+.cab-action-btn.withdraw{background:var(--bg3);border:1px solid var(--border2);color:var(--t1)}
+.cab-action-btn:active{transform:scale(.96)}
+.cab-history-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 0;border-bottom:1px solid var(--border);
+}
+.cab-history-left{display:flex;align-items:center;gap:10px}
+.cab-history-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.cab-history-icon.win{background:var(--green-bg)}
+.cab-history-icon.loss{background:var(--red-bg)}
+.cab-history-text{display:flex;flex-direction:column;gap:1px}
+.cab-history-text .h-title{font-size:13px;font-weight:600}
+.cab-history-text .h-time{font-size:11px;color:var(--t3)}
+.cab-history-amount{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600}
+.cab-history-amount.win{color:var(--green)}
+.cab-history-amount.loss{color:var(--red)}
+
+/* ═══════════════════════════════════════
+   JOIN BY CODE VIEW
+   ═══════════════════════════════════════ */
+.code-input-group{display:flex;gap:8px;margin-top:16px}
+.code-input{
+  flex:1;padding:14px 16px;border-radius:12px;
+  background:var(--bg2);border:1.5px solid var(--border2);
+  color:var(--t1);font-family:'JetBrains Mono',monospace;
+  font-size:16px;font-weight:600;letter-spacing:2px;
+  text-transform:uppercase;outline:none;
+  transition:border-color .2s;
+}
+.code-input:focus{border-color:var(--gold)}
+.code-input::placeholder{color:var(--t3);letter-spacing:0;font-weight:400;font-size:13px}
+.code-submit{
+  padding:14px 20px;border:none;border-radius:12px;
+  background:linear-gradient(135deg,var(--gold),var(--gold-d));
+  color:var(--bg0);font-family:'Outfit',sans-serif;
+  font-size:14px;font-weight:700;cursor:pointer;
+  transition:all .2s;white-space:nowrap;
+}
+.code-submit:active{transform:scale(.95)}
+
+/* ═══════════════════════════════════════
+   TOASTS & NOTIFICATIONS
+   ═══════════════════════════════════════ */
+.toast{
+  position:fixed;top:-80px;left:50%;transform:translateX(-50%);z-index:999;
+  padding:12px 20px;border-radius:14px;
+  font-size:13px;font-weight:600;
+  transition:top .4s cubic-bezier(.34,1.56,.64,1);
+  max-width:calc(100% - 40px);text-align:center;
+  box-shadow:0 8px 32px rgba(0,0,0,.4);
+}
+.toast.show{top:calc(env(safe-area-inset-top,10px) + 14px)}
+.toast.success{background:var(--green);color:#fff}
+.toast.error{background:var(--red);color:#fff}
+.toast.info{background:var(--purple);color:#fff}
+
+.win-toast{
+  position:fixed;inset:0;z-index:998;display:none;
+  align-items:center;justify-content:center;
+  background:rgba(4,6,14,.8);backdrop-filter:blur(8px);
+}
+.win-toast.show{display:flex}
+.win-toast-card{
+  background:linear-gradient(135deg,var(--bg2),var(--bg3));
+  border:2px solid rgba(226,179,79,.2);border-radius:24px;
+  padding:32px;text-align:center;
+  animation:winPop .5s cubic-bezier(.34,1.56,.64,1);
+  max-width:300px;width:90%;
+}
+@keyframes winPop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+.win-toast-emoji{font-size:52px;margin-bottom:12px}
+.win-toast-title{font-size:20px;font-weight:800;color:var(--green);margin-bottom:4px}
+.win-toast-amount{
+  font-family:'JetBrains Mono',monospace;
+  font-size:28px;font-weight:800;color:var(--gold-l);margin-bottom:16px;
+}
+.win-toast-btn{
+  padding:12px 32px;border:none;border-radius:12px;
+  background:linear-gradient(135deg,var(--gold),var(--gold-d));
+  color:var(--bg0);font-family:'Outfit',sans-serif;
+  font-size:14px;font-weight:700;cursor:pointer;
+}
+
+/* ═══════════════════════════════════════
+   EMPTY STATES
+   ═══════════════════════════════════════ */
+.empty-state{
+  text-align:center;padding:40px 20px;
+}
+.empty-state .es-icon{font-size:40px;margin-bottom:12px;opacity:.5}
+.empty-state .es-text{font-size:14px;color:var(--t3);line-height:1.5}
+
+/* ═══════════════════════════════════════
+   SHARE BUTTONS (in game result)
+   ═══════════════════════════════════════ */
+.share-row{display:flex;gap:8px;margin-top:16px}
+.share-btn{
+  flex:1;padding:12px;border:none;border-radius:10px;
+  font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;
+  transition:all .2s;
+}
+.share-btn.tg{background:#2AABEE;color:#fff}
+.share-btn.wa{background:#25D366;color:#fff}
+.share-btn:active{transform:scale(.95)}
+
+/* ═══════════════════════════════════════
+   UTILITIES
+   ═══════════════════════════════════════ */
+.hidden{display:none!important}
+.mono{font-family:'JetBrains Mono',monospace}
 </style>
 </head>
 <body>
-<canvas id="confetti"></canvas>
-<div class="app">
-  <div class="hdr">
-    <div class="hdr-logo"><div class="hdr-name">Lucky Number</div><div class="hdr-sub">Играй · Побеждай · Повторяй</div></div>
-    <div class="hdr-right">
-      <div class="hdr-bal" onclick="openCabinet()"><span class="hdr-bal-main" id="hdrBal">0</span><span class="hdr-bal-label">сўм</span></div>
-      <div class="hdr-avatar" onclick="openCabinet()">👤</div>
+<!-- ═══════════════════════════════════════
+     MAIN APP
+     ═══════════════════════════════════════ -->
+<div class="app" id="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo-group">
+      <div class="logo-icon">N</div>
+      <div class="logo-text">
+        <div class="logo-name">Lucky Number</div>
+        <div class="logo-tag">играй · побеждай · повторяй</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="balance-chip" onclick="showCabinet()">
+        <span class="balance-amount" id="headerBalance">0</span>
+        <span class="balance-cur" id="headerCur">сўм</span>
+      </div>
+      <div class="avatar-btn" onclick="showCabinet()">👤</div>
     </div>
   </div>
-  <div class="trust"><span class="trust-i">✅ Честная игра</span><span class="trust-d"></span><span class="trust-i">⚡ Моментально</span><span class="trust-d"></span><span class="trust-i">🔒 Безопасно</span></div>
-  <div class="hero">
-    <div class="hero-badge">🎮 Создай свою игру</div>
-    <div class="hero-title">Выбери ставку,<br>собери друзей,<br>выиграй ×2</div>
-    <div class="hero-steps">
-      <div class="hero-step"><div class="hero-step-n">1</div><span>Создай комнату</span></div>
-      <div class="hero-step"><div class="hero-step-n">2</div><span>Укажи кол-во игроков</span></div>
-      <div class="hero-step"><div class="hero-step-n">3</div><span>Укажи сумму ставки</span></div>
-      <div class="hero-step"><div class="hero-step-n">4</div><span>Поделись с друзьями</span></div>
-      <div class="hero-step"><div class="hero-step-n">★</div><span>Играй и побеждай!</span></div>
+
+  <!-- TRUST SECTION -->
+  <div class="trust-section">
+    <div class="trust-card">
+      <div class="trust-icon">🏆</div>
+      <div class="trust-text">Победители получают <b>вдвое больше</b> ставки</div>
     </div>
-    <button class="hero-cta" onclick="openCreate()">Создать комнату →</button>
+    <div class="trust-bar">🔓 Все номера открыты — система полностью прозрачная.</div>
   </div>
-  <div class="collapse">
-    <button class="collapse-head" onclick="toggleCollapse()"><span>❓ Как это работает?</span><span class="collapse-arrow" id="hiwArrow">▼</span></button>
-    <div class="collapse-body" id="hiwBody">
-      <div class="collapse-step"><span class="collapse-n">1</span><span>Выбери комнату и внеси ставку</span></div>
-      <div class="collapse-step"><span class="collapse-n">2</span><span>Получи случайный номер</span></div>
-      <div class="collapse-step"><span class="collapse-n">3</span><span>Когда наберётся нужное количество — розыгрыш</span></div>
-      <div class="collapse-step"><span class="collapse-n">4</span><span>Победители получают <strong style="color:var(--gold-400)">вдвое больше</strong> ставки</span></div>
-      <div class="collapse-note">Все номера открыты — система полностью прозрачная.</div>
+
+  <!-- ═══ TAB: PUBLIC ROOMS ═══ -->
+  <div class="tab-view active" id="tabPublic">
+    <div class="section-header">
+      <div class="section-title">Общие комнаты</div>
+      <div class="section-action" onclick="quickJoin()">Играй сразу</div>
+    </div>
+    <div class="rooms-list" id="publicRoomsList"></div>
+  </div>
+
+  <!-- ═══ TAB: MY ROOMS ═══ -->
+  <div class="tab-view" id="tabMy">
+    <div class="section-header">
+      <div class="section-title">Мои комнаты</div>
+    </div>
+    <div class="rooms-list" id="myRoomsList"></div>
+    <div class="empty-state hidden" id="myEmpty">
+      <div class="es-icon">📭</div>
+      <div class="es-text">У вас пока нет активных комнат.<br>Создайте или присоединитесь к игре!</div>
     </div>
   </div>
-  <div id="pnlPublic"><div class="sec-hdr"><span class="sec-title">Общие комнаты</span><span class="sec-badge">Играй сразу</span></div><div class="rooms" id="gridPublic"></div></div>
-  <div id="pnlPrivate" style="display:none"><div class="sec-hdr"><span class="sec-title">Мои комнаты</span><span class="sec-badge">Только друзья</span></div><div class="rooms" id="gridPrivate"></div></div>
-  <div id="pnlHistory" style="display:none"><div class="sec-hdr"><span class="sec-title">История игр</span><span class="sec-badge">Последние 20</span></div><div id="gridHistory"></div></div>
+
+  <!-- ═══ TAB: JOIN BY CODE ═══ -->
+  <div class="tab-view" id="tabCode">
+    <div class="section-header">
+      <div class="section-title">Войти по коду</div>
+    </div>
+    <p style="font-size:13px;color:var(--t3);line-height:1.5;margin-top:4px">
+      Получили код от друга? Введите его ниже чтобы присоединиться к приватной комнате.
+    </p>
+    <div class="code-input-group">
+      <input class="code-input" id="codeInput" placeholder="Введите код" maxlength="8" autocomplete="off">
+      <button class="code-submit" onclick="joinByCode()">Войти</button>
+    </div>
+  </div>
+
+  <!-- ═══ TAB: HISTORY ═══ -->
+  <div class="tab-view" id="tabHistory">
+    <div class="section-header">
+      <div class="section-title">История</div>
+    </div>
+    <div id="historyList"></div>
+    <div class="empty-state hidden" id="historyEmpty">
+      <div class="es-icon">📊</div>
+      <div class="es-text">Пока нет истории игр.<br>Начните играть!</div>
+    </div>
+  </div>
+
 </div>
-<nav class="bnav">
-  <button class="bnav-btn on" id="bnPublic" onclick="nav('public')"><span class="bnav-ico">🎲</span><span>Общие</span></button>
-  <button class="bnav-btn" id="bnPrivate" onclick="nav('private')"><span class="bnav-ico">🔒</span><span>Мои</span></button>
-  <button class="bnav-create" onclick="openCreate()"><div class="bnav-create-orb">+</div><span>Создать</span></button>
-  <button class="bnav-btn" id="bnCode" onclick="openJoin()"><span class="bnav-ico">🔑</span><span>По коду</span></button>
-  <button class="bnav-btn" id="bnHistory" onclick="nav('history')"><span class="bnav-ico">📜</span><span>История</span></button>
-</nav>
-<div class="ov" id="ovCreate" onclick="ovTap(event,'ovCreate')"><div class="sht"><div class="sht-grip"></div><div class="sht-hdr"><div class="sht-title">Создать комнату</div><div class="sht-x" onclick="closeOv('ovCreate')">✕</div></div>
-  <label class="f-label">Сумма ставки</label><div class="chips" id="chNom"></div>
-  <label class="f-label">Кол-во игроков</label><div class="chips" id="chPl"><button class="chip on" data-v="3" onclick="pickPl(this)">3</button><button class="chip" data-v="5" onclick="pickPl(this)">5</button><button class="chip" data-v="7" onclick="pickPl(this)">7</button><button class="chip" data-v="10" onclick="pickPl(this)">10</button></div>
-  <label class="f-label">Тип комнаты</label><div class="chips" id="chType"><button class="chip on" data-v="public" onclick="pickType(this)">🌐 Общая</button><button class="chip" data-v="private" onclick="pickType(this)">🔒 Для друзей</button></div>
-  <div class="prev" id="prevBox"></div>
-  <button class="cta" onclick="doCreate()">Создать и войти →</button>
-  <button class="cta" style="background:var(--bg-surface);color:var(--t2);margin-top:10px;box-shadow:none" onclick="closeOv('ovCreate')">Отмена</button>
-</div></div>
-<div class="ov" id="ovJoin" onclick="ovTap(event,'ovJoin')"><div class="sht"><div class="sht-grip"></div><div class="sht-hdr"><div class="sht-title">Войти по коду</div><div class="sht-x" onclick="closeOv('ovJoin')">✕</div></div>
-  <p style="font-size:13px;color:var(--t2);margin-bottom:var(--s5);line-height:1.6">Введите код от друга, чтобы присоединиться</p>
-  <input class="code-in" id="codeIn" placeholder="КОД" maxlength="6" autocomplete="off">
-  <button class="cta teal" onclick="doJoinCode()">Присоединиться</button>
-  <button class="cta" style="background:var(--bg-surface);color:var(--t2);margin-top:10px;box-shadow:none" onclick="closeOv('ovJoin')">Отмена</button>
-</div></div>
-<div class="ov" id="ovCab" onclick="ovTap(event,'ovCab')"><div class="sht"><div class="sht-grip"></div><div class="sht-hdr"><div class="sht-title">Мой кабинет</div><div class="sht-x" onclick="closeOv('ovCab')">✕</div></div>
-  <div class="cab">
-    <div class="cab-icon">🏆</div><div class="cab-id" id="cabId">LUCKY_—</div>
-    <div class="cab-bal" id="cabBal">0</div><div class="cab-bal-unit">сўм</div><div class="cab-bal-label">Баланс</div>
-    <div class="cab-pay">
-      <div class="cab-pay-title">💳 Платежи · P2P (UZcard, HUMO, Payme)</div>
-      <div class="cab-pay-row"><span class="cab-pay-k">Пополнение</span><span class="cab-pay-v">комиссия 4%</span></div>
-      <div class="cab-pay-row"><span class="cab-pay-k">Вывод</span><span class="cab-pay-v">комиссия 2%</span></div>
-      <div class="cab-pay-row"><span class="cab-pay-k">Срок вывода</span><span class="cab-pay-v green">от 2 до 24 часов</span></div>
-      <div class="cab-pay-row"><span class="cab-pay-k">Мин / Макс</span><span class="cab-pay-v">30 000 — 5 700 000</span></div>
-      <div class="cab-pay-note">Все платежи через защищённый P2P-канал. Средства поступают на вашу карту.</div>
+
+<!-- DEPOSIT BAR -->
+<div class="deposit-bar">
+  <button class="deposit-btn" onclick="doDeposit()">💳 Пополнить баланс</button>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <div class="nav-inner">
+    <div class="nav-item active" data-tab="tabPublic" onclick="switchTab('tabPublic',this)">
+      <div class="nav-icon">🌐</div>
+      <div class="nav-label">Общие</div>
     </div>
-    <div class="cab-grid">
-      <button class="cab-btn gold" onclick="deposit()">💳 Пополнить</button>
-      <button class="cab-btn gold" onclick="withdraw()">💸 Вывести</button>
-      <button class="cab-btn red" onclick="logout()">🚪 Выйти</button>
+    <div class="nav-item" data-tab="tabMy" onclick="switchTab('tabMy',this)" style="position:relative">
+      <div class="nav-icon">🔒</div>
+      <div class="nav-label">Мои</div>
+      <div class="nav-badge" id="myBadge" style="display:none">0</div>
     </div>
-    <div class="cab-support">Поддержка: @LuckyNumberSupport</div>
+    <div class="nav-create" onclick="openCreateModal()">
+      <div class="nav-create-btn">+</div>
+      <div class="nav-label">Создать</div>
+    </div>
+    <div class="nav-item" data-tab="tabCode" onclick="switchTab('tabCode',this)">
+      <div class="nav-icon">🔑</div>
+      <div class="nav-label">По коду</div>
+    </div>
+    <div class="nav-item" data-tab="tabHistory" onclick="switchTab('tabHistory',this)">
+      <div class="nav-icon">📋</div>
+      <div class="nav-label">История</div>
+    </div>
   </div>
-</div></div>
-<div class="game-ov" id="gameOv"><div class="game-box">
-  <div class="game-hdr"><div class="game-title" id="gTitle"></div><div class="game-sub" id="gSub"></div></div>
-  <div class="spin-wrap"><div class="spin-outer"><div class="spin-ring" id="gSpin">🎲</div></div></div>
-  <div class="ptiles" id="gTiles"></div><div class="game-status" id="gStatus"></div>
-  <div id="gInvite" style="display:none"></div><div id="gResult"></div>
-  <button id="gClose" class="cta" style="display:none;margin-top:var(--s4)" onclick="closeGame()">Закрыть</button>
-</div></div>
-<div class="win-toast" id="winToast"><div>🎉 ПОБЕДА!</div><div class="win-toast-amt" id="wtAmt"></div><div class="win-toast-unit">сўм</div></div>
-<div class="notif" id="notif"></div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     CREATE ROOM MODAL (Bottom Sheet)
+     ═══════════════════════════════════════ -->
+<div class="modal-backdrop" id="createBackdrop" onclick="closeCreateModal()"></div>
+<div class="modal-sheet" id="createSheet">
+  <div class="modal-content">
+    <div class="modal-handle"></div>
+
+    <!-- Type -->
+    <div class="modal-section-title">Тип комнаты</div>
+    <div class="type-toggle">
+      <button class="type-toggle-btn active" onclick="setRoomType('public',this)">🌐 Общая</button>
+      <button class="type-toggle-btn" onclick="setRoomType('private',this)">🔒 Приватная</button>
+    </div>
+
+    <!-- Nominal -->
+    <div class="modal-section-title">Ставка</div>
+    <div class="chip-row" id="nominalChips"></div>
+
+    <!-- Players -->
+    <div class="modal-section-title">Игроки</div>
+    <div class="chip-row" id="playerChips"></div>
+
+    <!-- Prize Preview -->
+    <div class="prize-preview" id="prizePreview">
+      <div class="prize-preview-row">
+        <span class="prize-preview-label">Банк</span>
+        <span class="prize-preview-val gold" id="pvBank">—</span>
+      </div>
+      <div class="prize-preview-row">
+        <span class="prize-preview-label">Победителей</span>
+        <span class="prize-preview-val" id="pvWinners">—</span>
+      </div>
+      <div class="prize-preview-row">
+        <span class="prize-preview-label">Приз каждому</span>
+        <span class="prize-preview-val green" id="pvPrize">—</span>
+      </div>
+    </div>
+
+    <button class="modal-submit" id="createBtn" onclick="createRoom()" disabled>Создать и войти</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     GAME VIEW OVERLAY
+     ═══════════════════════════════════════ -->
+<div class="game-overlay" id="gameOverlay">
+  <div class="game-header">
+    <div class="game-back" onclick="closeGame()">←</div>
+    <div class="game-title" id="gameTitle">Комната</div>
+    <div class="game-status-chip" id="gameStatusChip">Ожидание</div>
+  </div>
+  <div class="game-body">
+    <div class="game-info-bar">
+      <div class="game-info-item">
+        <div class="gi-val" id="giNominal">—</div>
+        <div class="gi-label">Ставка</div>
+      </div>
+      <div class="game-info-item">
+        <div class="gi-val" id="giBank">—</div>
+        <div class="gi-label">Банк</div>
+      </div>
+      <div class="game-info-item">
+        <div class="gi-val" id="giPrize">—</div>
+        <div class="gi-label">Приз</div>
+      </div>
+    </div>
+    <div class="players-grid" id="playersGrid"></div>
+    <button class="game-join-btn" id="gameJoinBtn" onclick="joinCurrentRoom()">Участвовать</button>
+    <div class="share-row hidden" id="shareRow">
+      <button class="share-btn tg" onclick="shareTG()">📨 Telegram</button>
+      <button class="share-btn wa" onclick="shareWA()">💬 WhatsApp</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     CABINET OVERLAY
+     ═══════════════════════════════════════ -->
+<div class="overlay" id="cabinetOverlay">
+  <div class="overlay-header">
+    <div class="overlay-title">👤 Мой кабинет</div>
+    <div class="overlay-close" onclick="closeCabinet()">✕</div>
+  </div>
+  <div class="overlay-body">
+    <div class="cab-balance-card">
+      <div class="cab-balance-label">Ваш баланс</div>
+      <div class="cab-balance-amount" id="cabBalance">0</div>
+      <div class="cab-balance-sub" id="cabBalanceSub"></div>
+    </div>
+    <div class="cab-actions">
+      <button class="cab-action-btn deposit" onclick="doDeposit()">💳 Пополнить</button>
+      <button class="cab-action-btn withdraw" onclick="doWithdraw()">💸 Вывести</button>
+    </div>
+    <div class="cab-stat-grid">
+      <div class="cab-stat">
+        <div class="cs-val" id="cabGames">0</div>
+        <div class="cs-label">Игр</div>
+      </div>
+      <div class="cab-stat">
+        <div class="cs-val" id="cabWins">0</div>
+        <div class="cs-label">Побед</div>
+      </div>
+      <div class="cab-stat">
+        <div class="cs-val" id="cabWinRate">0%</div>
+        <div class="cs-label">Винрейт</div>
+      </div>
+      <div class="cab-stat">
+        <div class="cs-val" id="cabProfit">0</div>
+        <div class="cs-label">Прибыль</div>
+      </div>
+    </div>
+    <div style="font-size:14px;font-weight:600;margin-bottom:12px;color:var(--t2)">Последние игры</div>
+    <div id="cabHistory"></div>
+  </div>
+</div>
+
+<!-- ROOM CREATED OVERLAY -->
+<div class="created-overlay" id="createdOverlay">
+  <div class="created-card">
+    <div class="created-emoji">✅</div>
+    <div class="created-title">Комната создана!</div>
+    <div class="created-sub">Поделитесь кодом с друзьями, чтобы начать игру</div>
+    <div class="created-code-wrap">
+      <div class="created-code-label">Код приглашения</div>
+      <div class="created-code" id="createdCode">------</div>
+      <button class="created-copy-btn" onclick="copyCreatedCode()">📋 Скопировать код</button>
+    </div>
+    <div class="created-share-row">
+      <button class="created-share-btn" onclick="shareCreatedTG()">✈️ Telegram</button>
+      <button class="created-share-btn" onclick="shareCreatedWA()">💬 WhatsApp</button>
+      <button class="created-share-btn" onclick="shareCreatedLink()">🔗 Ссылка</button>
+    </div>
+    <button class="created-enter-btn" onclick="enterCreatedRoom()">🎮 Войти в комнату</button>
+    <div class="created-close-link" onclick="closeCreatedOverlay()">Позже</div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- WIN TOAST -->
+<div class="win-toast" id="winToast">
+  <div class="win-toast-card">
+    <div class="win-toast-emoji">🎉</div>
+    <div class="win-toast-title">ВЫ ПОБЕДИЛИ!</div>
+    <div class="win-toast-amount" id="winAmount">0</div>
+    <button class="win-toast-btn" onclick="closeWinToast()">Отлично!</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     JAVASCRIPT ENGINE
+     ═══════════════════════════════════════════════════ -->
 <script>
-const tg=window.Telegram.WebApp;tg.ready();tg.expand();try{tg.enableClosingConfirmation()}catch(e){}
-const tgU=tg.initDataUnsafe?.user;const UID=tgU?.id||('demo_'+Math.random().toString(36).substr(2,6));
-const UNAME=tgU?.first_name||tgU?.username||'Игрок';
-try{tg.MainButton.setText('Пополнить баланс');tg.MainButton.onClick(()=>deposit());tg.MainButton.show()}catch(e){}
+// ══════════════════════════════════════
+//  TELEGRAM WEB APP INIT
+// ══════════════════════════════════════
+const tg = window.Telegram?.WebApp;
+if(tg){tg.ready();tg.expand();tg.enableClosingConfirmation?.();tg.setHeaderColor?.('#060912')}
+const TG_USER = tg?.initDataUnsafe?.user;
+const TG_LANG = TG_USER?.language_code?.substring(0,2) || 'uz';
+const TG_ID   = TG_USER?.id || Math.floor(Math.random()*999999);
+const TG_NAME = TG_USER?.first_name || 'Игрок';
+function haptic(t='medium'){try{tg?.HapticFeedback?.impactOccurred?.(t)}catch(e){}}
 
-function fNum(v){return Math.round(v).toLocaleString('ru-RU').replace(/,/g,' ')}
-function fFull(v){return fNum(v)}
-function fShort(v){if(v>=1000000){const m=v/1000000;return(m%1===0?m:m.toFixed(1))+' млн'}return fNum(v)}
-function fFullU(v){return fFull(v)+' сўм'}
+// ══════════════════════════════════════
+//  CURRENCY ENGINE
+// ══════════════════════════════════════
+const CURRENCIES = {
+  uz:{code:'UZS',symbol:'сўм',rate:12800,flag:'🇺🇿'},
+  ru:{code:'RUB',symbol:'₽',rate:92,flag:'🇷🇺'},
+  az:{code:'AZN',symbol:'₼',rate:1.70,flag:'🇦🇿'},
+  kk:{code:'KZT',symbol:'₸',rate:450,flag:'🇰🇿'},
+  uk:{code:'UAH',symbol:'₴',rate:41,flag:'🇺🇦'},
+  en:{code:'USD',symbol:'$',rate:1,flag:'🇺🇸'},
+};
+// Default: UZS for Uzbekistan market
+const CUR = CURRENCIES[TG_LANG] || CURRENCIES['uz'];
 
-const TIERS=[60000,150000,500000,1000000,2500000];
-const PL_COUNTS=[3,5,7,10];
-const WINNERS={3:1,5:2,7:3,10:4};
-function calc(n,p){const w=WINNERS[p];return{pot:n*p,prize:n*2,fee:n*p-(n*2*w),winners:w}}
-function fisherYates(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]]}return r}
+function fNum(n){
+  return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,' ');
+}
+function fLocal(usd){
+  const v = Math.round(usd * CUR.rate);
+  return fNum(v) + ' ' + CUR.symbol;
+}
+function fLocalShort(usd){
+  const v = Math.round(usd * CUR.rate);
+  if(v >= 1000000) return (v/1000000).toFixed(1).replace('.0','') + 'M';
+  if(v >= 1000) return Math.round(v/1000) + 'K';
+  return fNum(v);
+}
 
-let user=null,pubRooms=[],prvRooms=[],curGame=null,curPriv=false,mySlots=[];
-let crNom=TIERS[0],crPl=3,crType='public';
+// ══════════════════════════════════════
+//  GAME CONFIG
+// ══════════════════════════════════════
+// Nominals stored in USD internally, displayed in local currency
+const PUBLIC_NOMINALS  = [5, 10, 20, 50, 100];
+const PRIVATE_NOMINALS = [20, 50, 100, 200, 300, 400, 500];
+const PLAYER_COUNTS    = [3, 5, 7, 10];
 
-function loadUser(){const r=localStorage.getItem('ln_u_'+UID);user=r?JSON.parse(r):{id:UID,name:UNAME,bal:1280000,hist:[]}}
-function saveUser(){localStorage.setItem('ln_u_'+UID,JSON.stringify(user))}
-function initPubRooms(){const raw=localStorage.getItem('ln_pub_uzs');const saved=raw?JSON.parse(raw):[];pubRooms=[];for(const n of TIERS)for(const p of PL_COUNTS){const id=`pub_${n}_${p}`;const ex=saved.find(r=>r.id===id);pubRooms.push({id,nom:n,max:p,priv:false,players:ex?.players||[],active:ex?.active||false,code:null,...calc(n,p)})}}
-function savePub(){localStorage.setItem('ln_pub_uzs',JSON.stringify(pubRooms))}
-function loadPrv(){const r=localStorage.getItem('ln_prv_'+UID);prvRooms=r?JSON.parse(r):[]}
-function savePrv(){localStorage.setItem('ln_prv_'+UID,JSON.stringify(prvRooms))}
-function genCode(){return Math.random().toString(36).substr(2,6).toUpperCase()}
+function calcRoom(nominal, players){
+  const bank = nominal * players;
+  let winners, platformFee;
+  if(players === 3)  { winners = 1; platformFee = nominal; }
+  else if(players === 5)  { winners = 2; platformFee = nominal; }
+  else if(players === 7)  { winners = 3; platformFee = nominal; }
+  else if(players === 10) { winners = 4; platformFee = nominal * 2; }
+  const prizeEach = nominal * 2;
+  return { bank, winners, prizeEach, platformFee };
+}
 
-function buildNomChips(){document.getElementById('chNom').innerHTML=TIERS.map((n,i)=>`<button class="chip ${i===0?'on':''}" data-v="${n}" onclick="pickNom(this)">${fShort(n)}</button>`).join('');crNom=TIERS[0]}
-function openCreate(){crNom=TIERS[0];crPl=3;crType='public';document.querySelectorAll('#chPl .chip').forEach((c,i)=>c.classList.toggle('on',i===0));document.querySelectorAll('#chType .chip').forEach((c,i)=>c.classList.toggle('on',i===0));buildNomChips();updPreview();openOv('ovCreate')}
-function pickNom(b){b.parentElement.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));b.classList.add('on');crNom=parseFloat(b.dataset.v);updPreview()}
-function pickPl(b){b.parentElement.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));b.classList.add('on');crPl=parseInt(b.dataset.v);updPreview()}
-function pickType(b){b.parentElement.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));b.classList.add('on');crType=b.dataset.v;buildNomChips();updPreview()}
-function updPreview(){const c=calc(crNom,crPl);document.getElementById('prevBox').innerHTML=`<div class="prev-r"><span class="prev-k">Ставка</span><span class="prev-v gold">${fFullU(crNom)}</span></div><div class="prev-r"><span class="prev-k">Игроков</span><span class="prev-v">${crPl}</span></div><div class="prev-r"><span class="prev-k">В банке</span><span class="prev-v gold">${fFullU(c.pot)}</span></div><div class="prev-div"></div><div class="prev-r"><span class="prev-k">Победителей</span><span class="prev-v teal">${c.winners}</span></div><div class="prev-r"><span class="prev-k">Каждому</span><span class="prev-v gold">${fFullU(c.prize)}</span></div><div class="prev-div"></div><div class="prev-r"><span class="prev-k">Комиссия</span><span class="prev-v red">${fFullU(c.fee)}</span></div>`}
-function doCreate(){if(!user||user.bal<crNom){notify('❌ Недостаточно средств','err');return}if(crType==='private'){const code=genCode();const room={id:'prv_'+code,nom:crNom,max:crPl,priv:true,code,creator:UID,players:[],active:false,...calc(crNom,crPl)};prvRooms.push(room);savePrv();closeOv('ovCreate');enterRoom(room,true);setTimeout(()=>{tg.showPopup({title:'🎉 Комната создана!',message:`Код: ${code}\nОтправь друзьям!`,buttons:[{type:'default',text:'Скопировать код',id:'copy'},{type:'cancel',text:'Закрыть'}]},id=>{if(id==='copy'){navigator.clipboard.writeText(code).catch(()=>{});notify('✅ Код скопирован','ok')}})},350)}else{const room=pubRooms.find(r=>r.nom===crNom&&r.max===crPl&&!r.active&&r.players.length<r.max);if(!room){notify('❌ Нет свободных комнат','err');return}closeOv('ovCreate');enterRoom(room,false)}}
+// ══════════════════════════════════════
+//  USER DATA
+// ══════════════════════════════════════
+let userData = loadJSON('ln_user_' + TG_ID) || {
+  id: TG_ID, name: TG_NAME, balance: 100, // $100 demo
+  games:0, wins:0, profit:0, history:[]
+};
+function saveUser(){ saveJSON('ln_user_' + TG_ID, userData); }
+function loadJSON(k){ try{return JSON.parse(localStorage.getItem(k))}catch(e){return null} }
+function saveJSON(k,v){ try{localStorage.setItem(k,JSON.stringify(v))}catch(e){} }
 
-function joinRoom(id,priv){const room=(priv?prvRooms:pubRooms).find(r=>r.id===id);if(room)enterRoom(room,priv)}
-function enterRoom(room,priv){if(!user)return;if(room.active){notify('🎲 Игра уже идёт','err');return}if(room.players.length>=room.max){notify('❌ Все места заняты','err');return}if(user.bal<room.nom){notify('❌ Недостаточно средств','err');return}user.bal-=room.nom;saveUser();const taken=room.players.map(p=>p.num);const avail=Array.from({length:room.max},(_,i)=>i+1).filter(n=>!taken.includes(n));const num=avail[Math.floor(Math.random()*avail.length)];const pid=UID+'_'+Date.now();room.players.push({id:pid,num,name:user.name,uid:UID});mySlots.push(pid);if(priv)savePrv();else savePub();curGame=room;curPriv=priv;updateUI();openGameView();haptic('success');notify(`✅ Твой номер: ${num}!`,'ok');if(room.players.length===room.max)setTimeout(()=>startGame(),900)}
-function openJoin(){openOv('ovJoin')}
-function doJoinCode(){const code=(document.getElementById('codeIn').value||'').trim().toUpperCase();if(!code){notify('Введи код','err');return}const room=prvRooms.find(r=>r.code===code);if(!room){notify('❌ Комната не найдена','err');return}document.getElementById('codeIn').value='';closeOv('ovJoin');mySlots=[];enterRoom(room,true)}
+// ══════════════════════════════════════
+//  ROOMS DATA
+// ══════════════════════════════════════
+let publicRooms = [];
+let privateRooms = loadJSON('ln_private') || [];
 
-function openGameView(){const r=curGame;if(!r)return;document.getElementById('gTitle').textContent=`${fShort(r.nom)} сўм · ${r.priv?'🔒 Приватная':'🌐 Общая'}`;document.getElementById('gSub').textContent=`${r.winners} победител${r.winners>1?'я':'ь'} по ${fFullU(r.prize)}`;document.getElementById('gSpin').textContent='🎲';document.getElementById('gSpin').classList.remove('go');document.getElementById('gResult').innerHTML='';document.getElementById('gClose').style.display='none';const inv=document.getElementById('gInvite');if(r.priv&&r.code){inv.style.display='block';inv.innerHTML=`<div class="inv-row"><span style="font-size:10px;color:var(--t3)">Код:</span><span class="inv-code">${r.code}</span><button class="inv-copy" onclick="copyCode('${r.code}')">📋</button></div><div class="share-row"><button class="share-btn tg" onclick="shareTG('${r.code}',${r.nom},${r.max})">Telegram</button><button class="share-btn wa" onclick="shareWA('${r.code}',${r.nom},${r.max})">WhatsApp</button><button class="share-btn" onclick="copyLink('${r.code}',${r.nom},${r.max})">🔗 Ссылка</button></div>`}else{inv.style.display='none'}renderTiles();document.getElementById('gameOv').classList.add('on')}
-function renderTiles(){const r=curGame;if(!r)return;let h='';r.players.forEach(p=>{h+=`<div class="ptile ${mySlots.includes(p.id)?'me':''}" id="t_${p.id}">${p.num}</div>`});for(let i=0;i<r.max-r.players.length;i++)h+=`<div class="ptile" style="opacity:.2">·</div>`;document.getElementById('gTiles').innerHTML=h;const myN=r.players.filter(p=>mySlots.includes(p.id)).map(p=>p.num);document.getElementById('gStatus').textContent=r.players.length<r.max?`Ждём игроков · ${r.players.length}/${r.max}${myN.length?` · Твой: ${myN.join(', ')}`:''}`:`Розыгрыш · Твой: ${myN.join(', ')}`}
+function savePrivate(){ saveJSON('ln_private', privateRooms); }
 
-function startGame(){const r=curGame;if(!r||r.active)return;r.active=true;if(curPriv)savePrv();else savePub();document.getElementById('gStatus').textContent='Определяем победителей...';const spin=document.getElementById('gSpin');spin.classList.add('go');haptic('impact');const nums=r.players.map(p=>p.num);let tick=0;const iv=setInterval(()=>{spin.textContent=nums[tick++%nums.length]},70);setTimeout(()=>{clearInterval(iv);spin.classList.remove('go');revealWinners()},3200)}
+function initPublicRooms(){
+  publicRooms = [];
+  PUBLIC_NOMINALS.forEach(nom => {
+    PLAYER_COUNTS.forEach(pc => {
+      const r = calcRoom(nom, pc);
+      publicRooms.push({
+        id: 'pub_' + nom + '_' + pc,
+        nominal: nom, maxPlayers: pc,
+        ...r,
+        players: generateFakePlayers(pc),
+        isPrivate: false, gameActive: false, gameFinished: false,
+        resultPlayers: null
+      });
+    });
+  });
+}
 
-function revealWinners(){const r=curGame;if(!r)return;const sh=fisherYates(r.players);const wP=sh.slice(0,r.winners);document.getElementById('gSpin').textContent=wP[0].num;wP.forEach((w,i)=>{setTimeout(()=>{const t=document.getElementById('t_'+w.id);if(t)t.classList.add('win');haptic('impact')},i*300)});let myWin=0;wP.forEach(w=>{if(mySlots.includes(w.id))myWin+=r.prize});const delay=wP.length*300+400;setTimeout(()=>{if(myWin>0){user.bal+=myWin;saveUser();showWinToast(myWin);fireConfetti()}user.hist.unshift({date:new Date().toLocaleString('ru'),nom:r.nom,max:r.max,pot:r.pot,fee:r.fee,winners:wP.map(w=>({num:w.num,prize:r.prize})),myWin,priv:r.priv});if(user.hist.length>50)user.hist=user.hist.slice(0,50);saveUser();document.getElementById('gResult').innerHTML=`<div class="result"><div class="result-title">Результаты</div><div class="result-row">В банке: <b>${fFullU(r.pot)}</b></div><div class="result-row">Комиссия: <b>${fFullU(r.fee)}</b></div><div style="height:8px"></div>${wP.map(w=>`<div class="result-row">🎲 #${w.num} <b style="color:var(--gold-400)">→ ${fFullU(r.prize)}</b></div>`).join('')}${myWin>0?`<div class="result-win">+${fFull(myWin)}</div><div class="result-win-unit">сўм</div>`:`<div style="color:var(--t3);font-size:13px;margin-top:var(--s3)">В следующий раз повезёт!</div>`}</div>`;document.getElementById('gStatus').textContent='';document.getElementById('gClose').style.display='block';setTimeout(()=>{if(curPriv){prvRooms=prvRooms.filter(x=>x.id!==r.id);savePrv()}else{const idx=pubRooms.findIndex(x=>x.id===r.id);if(idx!==-1){pubRooms[idx].players=[];pubRooms[idx].active=false;savePub()}}updateUI()},800)},delay)}
+function generateFakePlayers(max){
+  const count = Math.floor(Math.random() * max);
+  const arr = [];
+  for(let i=0;i<count;i++){
+    arr.push({
+      id: 'bot_' + Math.random().toString(36).substr(2,6),
+      name: randomName(),
+      number: null
+    });
+  }
+  return arr;
+}
 
-function closeGame(){document.getElementById('gameOv').classList.remove('on');curGame=null;mySlots=[];updateUI()}
+const NAMES = ['Азиз','Дильшод','Нодир','Жасур','Шахзод','Фаррух','Бобур','Сардор','Акмал','Улугбек',
+  'Мадина','Гулнора','Зарина','Дилноза','Нигора','Шахло','Малика','Камола','Лола','Севара',
+  'Алишер','Тимур','Рустам','Отабек','Достон','Сирожиддин','Хусниддин','Абдулла','Исмоил','Бехруз'];
+function randomName(){ return NAMES[Math.floor(Math.random()*NAMES.length)]; }
 
-const confC=document.getElementById('confetti'),confX=confC.getContext('2d');let confP=[],confA=null;
-function resizeConf(){confC.width=window.innerWidth;confC.height=window.innerHeight}window.addEventListener('resize',resizeConf);resizeConf();
-function fireConfetti(){confP=[];const cols=['#F0B90B','#FCD535','#FFD54F','#2DD4A8','#FF4D6D','#60A5FA','#FFF'];for(let i=0;i<120;i++){confP.push({x:confC.width/2+(Math.random()-.5)*100,y:confC.height/2,vx:(Math.random()-.5)*18,vy:-Math.random()*22-5,w:Math.random()*8+4,h:Math.random()*6+3,color:cols[Math.floor(Math.random()*cols.length)],rot:Math.random()*360,rv:(Math.random()-.5)*12,g:.35+Math.random()*.15,life:1,decay:.005+Math.random()*.005})}if(!confA)animConf()}
-function animConf(){confX.clearRect(0,0,confC.width,confC.height);confP=confP.filter(p=>p.life>0);if(!confP.length){confA=null;return}confP.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=p.g;p.vx*=.98;p.rot+=p.rv;p.life-=p.decay;confX.save();confX.translate(p.x,p.y);confX.rotate(p.rot*Math.PI/180);confX.globalAlpha=Math.max(0,p.life);confX.fillStyle=p.color;confX.fillRect(-p.w/2,-p.h/2,p.w,p.h);confX.restore()});confA=requestAnimationFrame(animConf)}
+// ══════════════════════════════════════
+//  UI RENDERING
+// ══════════════════════════════════════
+function updateAll(){
+  updateHeader();
+  renderPublicRooms();
+  renderMyRooms();
+  renderHistory();
+}
 
-function renderPub(){const grid=document.getElementById('gridPublic');if(!grid)return;let html='';TIERS.forEach((nom,gi)=>{html+=`<div class="sec-label" style="animation-delay:${gi*.05}s">${fFullU(nom)}</div>`;PL_COUNTS.forEach(pl=>{const room=pubRooms.find(r=>r.nom===nom&&r.max===pl);if(room)html+=roomCard(room,false)})});grid.innerHTML=html}
-function renderPrv(){const grid=document.getElementById('gridPrivate');if(!grid)return;if(!prvRooms.length){grid.innerHTML=`<div class="empty"><div class="empty-ico">🔒</div><div class="empty-t">Нет комнат</div><div class="empty-s">Нажми «Создать», чтобы собрать друзей</div></div>`;return}grid.innerHTML=prvRooms.map(r=>roomCard(r,true)).join('')}
+function updateHeader(){
+  document.getElementById('headerBalance').textContent = fLocalShort(userData.balance);
+  document.getElementById('headerCur').textContent = CUR.symbol;
+}
 
-function roomCard(r,priv){const filled=r.players.length;const pct=Math.round((filled/r.max)*100);const canJoin=user&&!r.active&&filled<r.max&&user.bal>=r.nom;const myNums=r.players.filter(p=>p.uid===UID).map(p=>p.num);const dots=Array.from({length:r.max},(_,i)=>{const p=r.players[i];if(!p)return`<div class="dot"></div>`;return`<div class="dot ${p.uid===UID?'mine':'taken'}">${p.num}</div>`}).join('');const invHtml=priv&&r.code?`<div class="inv-row"><span style="font-size:9px;color:var(--t4)">Код:</span><span class="inv-code">${r.code}</span><button class="inv-copy" onclick="event.stopPropagation();copyCode('${r.code}')">📋</button></div><div class="share-row"><button class="share-btn tg" onclick="event.stopPropagation();shareTG('${r.code}',${r.nom},${r.max})">Telegram</button><button class="share-btn wa" onclick="event.stopPropagation();shareWA('${r.code}',${r.nom},${r.max})">WhatsApp</button><button class="share-btn" onclick="event.stopPropagation();copyLink('${r.code}',${r.nom},${r.max})">🔗 Ссылка</button></div>`:'';let btnLabel=`Играть · ${fShort(r.nom)}`;if(r.active)btnLabel='⏳ Розыгрыш идёт';else if(filled>=r.max)btnLabel='Нет мест';else if(myNums.length)btnLabel=`Ещё номер · ${fShort(r.nom)}`;else if(!user||user.bal<r.nom)btnLabel='Пополнить баланс';return`<div class="room ${priv?'priv':''}"><div class="room-top"><div><div class="room-amt">${fFull(r.nom)}</div><div class="room-amt-label">сўм</div></div><div class="room-tags">${priv?'<span class="tag tag-priv">Друзья</span>':''}<span class="tag tag-players">${r.max} игр.</span>${filled>=r.max?'<span class="tag tag-full">Занято</span>':''}</div></div><div class="room-prize"><span class="room-prize-label">🏆 ${r.winners} победител${r.winners>1?'я':'ь'}</span><div class="room-prize-right"><span class="room-prize-val">${fFull(r.prize)}</span><span class="room-prize-sub">сўм</span></div></div><div class="room-mult">${fShort(r.nom)} → ${fShort(r.prize)} сўм (×2)</div>${invHtml}<div class="dots">${dots}</div><div class="room-prog"><div class="prog-track"><div class="prog-fill" style="width:${pct}%"></div></div><span class="prog-txt">${filled}/${r.max}</span></div><button class="cta ${priv?'teal':''}" onclick="joinRoom('${r.id}',${priv})" ${!canJoin?'disabled':''}>${btnLabel}</button></div>`}
+function renderPublicRooms(){
+  const list = document.getElementById('publicRoomsList');
+  list.innerHTML = publicRooms.map(r => roomCardHTML(r)).join('');
+}
 
-function renderHist(){const el=document.getElementById('gridHistory');if(!el)return;if(!user||!user.hist.length){el.innerHTML=`<div class="empty"><div class="empty-ico">📜</div><div class="empty-t">История пуста</div><div class="empty-s">Сыграй первую игру!</div></div>`;return}el.innerHTML=user.hist.slice(0,20).map((g,i)=>`<div class="hist" style="animation-delay:${i*.04}s"><div class="hist-top"><span class="hist-date">${g.date}</span>${g.myWin>0?`<span class="hist-win">+${fShort(g.myWin)}</span>`:'<span class="hist-loss">—</span>'}</div><div class="hist-detail">${fShort(g.nom)} сўм · ${g.max} игроков${g.priv?' 🔒':''}<br>Банк: ${fFullU(g.pot)} · Комиссия: ${fFullU(g.fee)}<br>🏆 ${g.winners.map(w=>`#${w.num} → ${fShort(w.prize)}`).join(', ')}${g.myWin>0?`<br><span style="color:var(--teal)">Выигрыш: ${fFullU(g.myWin)}</span>`:''}</div></div>`).join('')}
+function renderMyRooms(){
+  const myRooms = [...publicRooms.filter(r => r.players.some(p => p.id === TG_ID)),
+                   ...privateRooms.filter(r => r.players.some(p => p.id === TG_ID))];
+  const list = document.getElementById('myRoomsList');
+  const empty = document.getElementById('myEmpty');
+  if(myRooms.length === 0){
+    list.innerHTML = '';
+    empty.classList.remove('hidden');
+  } else {
+    empty.classList.add('hidden');
+    list.innerHTML = myRooms.map(r => roomCardHTML(r)).join('');
+  }
+}
 
-function updateUI(){if(user){document.getElementById('hdrBal').textContent=fFull(user.bal);document.getElementById('cabBal').textContent=fFull(user.bal);document.getElementById('cabId').textContent='LUCKY_'+user.id}renderPub();renderPrv();renderHist()}
+function renderHistory(){
+  const list = document.getElementById('historyList');
+  const empty = document.getElementById('historyEmpty');
+  if(!userData.history || userData.history.length === 0){
+    list.innerHTML = '';
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+  list.innerHTML = userData.history.slice().reverse().map(h => `
+    <div class="cab-history-item">
+      <div class="cab-history-left">
+        <div class="cab-history-icon ${h.won?'win':'loss'}">${h.won?'🏆':'💔'}</div>
+        <div class="cab-history-text">
+          <div class="h-title">${fLocal(h.nominal)} · ${h.players} игроков</div>
+          <div class="h-time">${h.time}</div>
+        </div>
+      </div>
+      <div class="cab-history-amount ${h.won?'win':'loss'}">${h.won?'+':'−'}${fLocal(h.won?h.prize:h.nominal)}</div>
+    </div>
+  `).join('');
+}
 
-const NAV_MAP={public:'bnPublic',private:'bnPrivate',history:'bnHistory'};
-function nav(tab){Object.values(NAV_MAP).forEach(id=>document.getElementById(id)?.classList.remove('on'));if(NAV_MAP[tab])document.getElementById(NAV_MAP[tab])?.classList.add('on');document.getElementById('pnlPublic').style.display=tab==='public'?'block':'none';document.getElementById('pnlPrivate').style.display=tab==='private'?'block':'none';document.getElementById('pnlHistory').style.display=tab==='history'?'block':'none';window.scrollTo({top:0,behavior:'smooth'})}
-function openOv(id){document.getElementById(id).classList.add('on')}
-function closeOv(id){document.getElementById(id).classList.remove('on')}
-function ovTap(e,id){if(e.target===document.getElementById(id))closeOv(id)}
-function openCabinet(){openOv('ovCab')}
+function roomCardHTML(r){
+  const info = calcRoom(r.nominal, r.maxPlayers);
+  const filled = r.players.length;
+  const pct = Math.round((filled/r.maxPlayers)*100);
+  const isFull = filled >= r.maxPlayers;
+  const imIn = r.players.some(p => p.id === TG_ID);
+  const isLive = r.gameActive;
+  const isDone = r.gameFinished;
 
-function shareMsg(code,nom,max){return`🎰 Lucky Number\n\nСтавка: ${fFullU(nom)} · ${max} игроков\nКод: ${code}\n\nПрисоединяйся!`}
-function shareTG(c,n,p){window.open(`https://t.me/share/url?url=https://t.me/Nomer_13bot&text=${encodeURIComponent(shareMsg(c,n,p))}`,'_blank')}
-function shareWA(c,n,p){window.open(`https://wa.me/?text=${encodeURIComponent(shareMsg(c,n,p))}`,'_blank')}
-function copyLink(c,n,p){navigator.clipboard.writeText(shareMsg(c,n,p)).catch(()=>{});notify('✅ Скопировано','ok')}
-function copyCode(code){navigator.clipboard.writeText(code).catch(()=>{});notify('✅ Код скопирован','ok')}
+  let badgeText = filled+'/'+r.maxPlayers+' игр.';
+  let badgeClass = '';
+  if(isDone) { badgeText = '✅ Завершена'; badgeClass = 'done'; }
+  else if(isLive) { badgeText = '⏳ Розыгрыш'; badgeClass = 'live'; }
+  else if(isFull) { badgeText = '🔴 Полная'; badgeClass = 'full'; }
 
-function deposit(){tg.showPopup({title:'Пополнение · P2P',message:'UZcard, HUMO, Payme\nКомиссия: 4%\n\nСредства поступят мгновенно',buttons:[{type:'default',text:'Пополнить (демо +500 000)',id:'demo'},{type:'cancel',text:'Отмена'}]},id=>{if(id==='demo'){user.bal+=500000;saveUser();updateUI();notify('✅ +500 000 сўм зачислено','ok');haptic('success')}})}
-function withdraw(){tg.showPopup({title:'Вывод · P2P',message:'UZcard, HUMO, Payme\nКомиссия: 2%\nСрок: от 2 до 24 часов\n\nДля вывода напиши: @LuckyNumberSupport',buttons:[{type:'cancel',text:'Понятно'}]})}
-function logout(){tg.showConfirm('Выйти из аккаунта?',ok=>{if(ok){user=null;closeOv('ovCab');tg.close()}})}
+  const youTag = imIn && !isDone ? '<div class="room-you-tag">🎮 Вы участвуете</div>' : '';
 
-function showWinToast(amount){document.getElementById('wtAmt').textContent='+'+fFull(amount);const el=document.getElementById('winToast');el.classList.add('show');haptic('success');setTimeout(()=>el.classList.remove('show'),3800)}
-let notifTimer;function notify(msg,type='ok'){const el=document.getElementById('notif');el.textContent=msg;el.className='notif show '+type;clearTimeout(notifTimer);notifTimer=setTimeout(()=>el.classList.remove('show'),2800)}
-function haptic(type){try{if(type==='success')tg.HapticFeedback.notificationOccurred('success');else if(type==='impact')tg.HapticFeedback.impactOccurred('medium');else tg.HapticFeedback.selectionChanged()}catch(e){}}
-function toggleCollapse(){const body=document.getElementById('hiwBody');const arrow=document.getElementById('hiwArrow');const isOpen=body.style.display==='none'||!body.style.display;body.style.display=isOpen?'block':'none';arrow.classList.toggle('open',isOpen)}
-setInterval(()=>{[...pubRooms,...prvRooms].forEach(room=>{if(room.players.length===room.max&&!room.active){room.active=true;if(room.priv)savePrv();else savePub();if(curGame?.id===room.id)startGame()}})},1500);
-loadUser();initPubRooms();loadPrv();updateUI();
+  return `
+    <div class="room-card ${imIn?'im-in':''}" onclick="openRoom('${r.id}')">
+      ${youTag}
+      <div class="room-top">
+        <div class="room-nominal-group">
+          <div class="room-nominal">${fNum(Math.round(r.nominal * CUR.rate))}</div>
+          <div class="room-nominal-label">${CUR.symbol}</div>
+        </div>
+        <div class="room-badge ${badgeClass}">${badgeText}</div>
+      </div>
+      <div class="room-prize-row">
+        <div class="room-prize-label">🏆 ${info.winners} ${winnerWord(info.winners)}</div>
+        <div class="room-prize-amount">
+          <span class="striked">${fLocal(r.nominal)}</span>
+          ${fLocal(info.prizeEach)}
+        </div>
+      </div>
+      <div class="room-progress"><div class="room-progress-fill" style="width:${pct}%"></div></div>
+      <div class="room-meta">
+        <div class="room-meta-item">${r.isPrivate?'🔒 Приватная':'🌐 Общая'}</div>
+        <div class="room-meta-item">${fLocal(r.nominal)} → ${fLocal(info.prizeEach)} (×2)</div>
+      </div>
+    </div>
+  `;
+}
+
+function winnerWord(n){
+  if(n===1) return 'победитель';
+  if(n>=2 && n<=4) return 'победителя';
+  return 'победителей';
+}
+
+// ══════════════════════════════════════
+//  TAB NAVIGATION
+// ══════════════════════════════════════
+function switchTab(tabId, el){
+  haptic('light');
+  document.querySelectorAll('.tab-view').forEach(t => t.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if(el) el.classList.add('active');
+}
+
+// ══════════════════════════════════════
+//  CREATE ROOM MODAL
+// ══════════════════════════════════════
+let createState = { type:'public', nominal:null, players:null };
+
+function openCreateModal(){
+  haptic('medium');
+  createState = { type:'public', nominal:null, players:null };
+  renderCreateChips();
+  updatePrizePreview();
+  document.getElementById('createBackdrop').classList.add('show');
+  document.getElementById('createSheet').classList.add('show');
+}
+function closeCreateModal(){
+  document.getElementById('createBackdrop').classList.remove('show');
+  document.getElementById('createSheet').classList.remove('show');
+}
+
+function setRoomType(type, btn){
+  haptic('light');
+  createState.type = type;
+  createState.nominal = null;
+  btn.parentElement.querySelectorAll('.type-toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCreateChips();
+  updatePrizePreview();
+}
+
+function renderCreateChips(){
+  const noms = createState.type === 'public' ? PUBLIC_NOMINALS : PRIVATE_NOMINALS;
+  const nomEl = document.getElementById('nominalChips');
+  nomEl.innerHTML = noms.map(n => `
+    <div class="chip ${createState.nominal===n?'selected':''}" onclick="selectNominal(${n})">${fLocal(n)}</div>
+  `).join('');
+
+  const plEl = document.getElementById('playerChips');
+  plEl.innerHTML = PLAYER_COUNTS.map(p => `
+    <div class="player-chip ${createState.players===p?'selected':''}" onclick="selectPlayers(${p})">${p}</div>
+  `).join('');
+}
+
+function selectNominal(n){
+  haptic('light');
+  createState.nominal = n;
+  renderCreateChips();
+  updatePrizePreview();
+}
+function selectPlayers(p){
+  haptic('light');
+  createState.players = p;
+  renderCreateChips();
+  updatePrizePreview();
+}
+
+function updatePrizePreview(){
+  const btn = document.getElementById('createBtn');
+  if(!createState.nominal || !createState.players){
+    document.getElementById('pvBank').textContent = '—';
+    document.getElementById('pvWinners').textContent = '—';
+    document.getElementById('pvPrize').textContent = '—';
+    btn.disabled = true;
+    return;
+  }
+  const info = calcRoom(createState.nominal, createState.players);
+  document.getElementById('pvBank').textContent = fLocal(info.bank);
+  document.getElementById('pvWinners').textContent = info.winners + ' ' + winnerWord(info.winners);
+  document.getElementById('pvPrize').textContent = fLocal(info.prizeEach);
+  btn.disabled = false;
+  if(createState.type === 'private'){
+    btn.textContent = 'Создать комнату · ' + fLocal(createState.nominal);
+  } else {
+    btn.textContent = 'Создать и войти · ' + fLocal(createState.nominal);
+  }
+}
+
+let lastCreatedRoom = null;
+
+function createRoom(){
+  haptic('heavy');
+  if(!createState.nominal || !createState.players) return;
+  if(userData.balance < createState.nominal){
+    toast('Недостаточно средств! Пополните баланс.','error');
+    return;
+  }
+
+  const info = calcRoom(createState.nominal, createState.players);
+  const isPrivate = createState.type === 'private';
+  const code = isPrivate ? generateCode() : null;
+
+  const room = {
+    id: (isPrivate?'prv_':'pub_') + Date.now(),
+    nominal: createState.nominal,
+    maxPlayers: createState.players,
+    ...info,
+    players: [{ id:TG_ID, name:TG_NAME, number:null }],
+    isPrivate, code,
+    gameActive: false, gameFinished: false, resultPlayers: null
+  };
+
+  // Deduct balance
+  userData.balance -= createState.nominal;
+  saveUser();
+
+  if(isPrivate){
+    privateRooms.push(room);
+    savePrivate();
+  } else {
+    publicRooms.push(room);
+  }
+
+  closeCreateModal();
+  updateAll();
+
+  if(isPrivate && code){
+    // Show the Room Created overlay with code + share options
+    lastCreatedRoom = room;
+    document.getElementById('createdCode').textContent = code;
+    document.getElementById('createdOverlay').classList.add('show');
+    haptic('success');
+  } else {
+    toast('Вы вошли в комнату!','success');
+    openRoom(room.id);
+  }
+}
+
+function copyCreatedCode(){
+  if(!lastCreatedRoom) return;
+  navigator.clipboard.writeText(lastCreatedRoom.code).catch(()=>{});
+  toast('Код скопирован!','success');
+  haptic('light');
+}
+
+function shareCreatedTG(){
+  if(!lastCreatedRoom) return;
+  const r = lastCreatedRoom;
+  const text = '🎰 Lucky Number — Приватная комната!\n\n'
+    + '💰 Ставка: ' + fLocal(r.nominal) + '\n'
+    + '👥 Игроков: ' + r.maxPlayers + '\n'
+    + '🏆 Приз: ' + fLocal(r.prizeEach) + '\n\n'
+    + '🔑 Код: ' + r.code + '\n\n'
+    + 'Заходи играть! 👇\nhttps://t.me/Nomer_13bot';
+  window.open('https://t.me/share/url?text=' + encodeURIComponent(text), '_blank');
+}
+
+function shareCreatedWA(){
+  if(!lastCreatedRoom) return;
+  const r = lastCreatedRoom;
+  const text = '🎰 Lucky Number\n💰 ' + fLocal(r.nominal) + ' | 👥 ' + r.maxPlayers + ' игроков\n🏆 Приз: ' + fLocal(r.prizeEach) + '\n🔑 Код: ' + r.code + '\nhttps://t.me/Nomer_13bot';
+  window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+}
+
+function shareCreatedLink(){
+  if(!lastCreatedRoom) return;
+  const r = lastCreatedRoom;
+  const text = 'Lucky Number | Ставка: ' + fLocal(r.nominal) + ' | Код: ' + r.code + ' | https://t.me/Nomer_13bot';
+  navigator.clipboard.writeText(text).catch(()=>{});
+  toast('Ссылка скопирована!','success');
+}
+
+function enterCreatedRoom(){
+  if(!lastCreatedRoom) return;
+  const roomId = lastCreatedRoom.id;
+  closeCreatedOverlay();
+  setTimeout(() => openRoom(roomId), 200);
+}
+
+function closeCreatedOverlay(){
+  document.getElementById('createdOverlay').classList.remove('show');
+  lastCreatedRoom = null;
+}
+
+function generateCode(){
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let code = '';
+  for(let i=0;i<6;i++) code += chars[Math.floor(Math.random()*chars.length)];
+  return code;
+}
+
+// ══════════════════════════════════════
+//  GAME VIEW
+// ══════════════════════════════════════
+let currentRoom = null;
+let gameInterval = null;
+
+function openRoom(roomId){
+  haptic('medium');
+  const room = findRoom(roomId);
+  if(!room) return;
+  currentRoom = room;
+  renderGame();
+  document.getElementById('gameOverlay').classList.add('show');
+}
+
+function closeGame(){
+  haptic('light');
+  document.getElementById('gameOverlay').classList.remove('show');
+  currentRoom = null;
+  if(gameInterval) clearInterval(gameInterval);
+  updateAll();
+}
+
+function findRoom(id){
+  return publicRooms.find(r=>r.id===id) || privateRooms.find(r=>r.id===id);
+}
+
+function renderGame(){
+  if(!currentRoom) return;
+  const r = currentRoom;
+  const info = calcRoom(r.nominal, r.maxPlayers);
+  const inRoom = r.players.some(p => p.id === TG_ID);
+  const isFull = r.players.length >= r.maxPlayers;
+
+  document.getElementById('gameTitle').textContent = (r.isPrivate?'🔒 ':'🌐 ') + fLocal(r.nominal);
+  document.getElementById('giNominal').textContent = fLocal(r.nominal);
+  document.getElementById('giBank').textContent = fLocal(info.bank);
+  document.getElementById('giPrize').textContent = fLocal(info.prizeEach);
+
+  // Status
+  const statusEl = document.getElementById('gameStatusChip');
+  if(r.gameFinished){
+    statusEl.textContent = '✅ Завершена';
+    statusEl.style.background = 'var(--green-bg)';
+    statusEl.style.color = 'var(--green)';
+  } else if(r.gameActive){
+    statusEl.textContent = '⏳ Розыгрыш...';
+    statusEl.style.background = 'var(--gold-bg)';
+    statusEl.style.color = 'var(--gold)';
+  } else {
+    statusEl.textContent = r.players.length + '/' + r.maxPlayers + ' игроков';
+    statusEl.style.background = 'var(--purple-bg)';
+    statusEl.style.color = 'var(--purple)';
+  }
+
+  // Players grid
+  const grid = document.getElementById('playersGrid');
+  let html = '';
+  for(let i=0;i<r.maxPlayers;i++){
+    const p = r.players[i];
+    if(p){
+      const isYou = p.id === TG_ID;
+      const isWinner = r.gameFinished && p.winner;
+      const isLoser = r.gameFinished && !p.winner;
+      html += `
+        <div class="player-slot filled ${isYou?'you':''} ${isWinner?'winner':''} ${isLoser?'loser':''}">
+          <div class="player-left">
+            <div class="player-avatar">${isYou?'🫵':playerEmoji(i)}</div>
+            <div class="player-name">${p.name}${isYou?' (вы)':''}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="player-number${r.gameActive && !r.gameFinished?' spinning':''}" id="pnum_${i}">
+              ${r.gameFinished && p.number != null ? p.number : (r.gameActive ? '?' : '—')}
+            </div>
+            ${r.gameFinished ? `<div class="player-result ${isWinner?'win':'lose'}">${isWinner?'🏆 ×2':'—'}</div>` : ''}
+          </div>
+        </div>
+      `;
+    } else {
+      html += `
+        <div class="player-slot">
+          <div class="player-left">
+            <div class="player-avatar" style="opacity:.3">👤</div>
+            <div class="player-name" style="color:var(--t3)">Ожидание...</div>
+          </div>
+          <div class="player-number" style="color:var(--t3)">—</div>
+        </div>
+      `;
+    }
+  }
+  grid.innerHTML = html;
+
+  // Join button
+  const joinBtn = document.getElementById('gameJoinBtn');
+  const shareRow = document.getElementById('shareRow');
+  if(r.gameFinished){
+    joinBtn.classList.add('hidden');
+    shareRow.classList.remove('hidden');
+  } else if(inRoom){
+    joinBtn.textContent = 'Вы уже в игре';
+    joinBtn.disabled = true;
+    joinBtn.classList.remove('hidden');
+    shareRow.classList.add('hidden');
+  } else if(isFull){
+    joinBtn.textContent = '🔴 Комната заполнена';
+    joinBtn.disabled = true;
+    joinBtn.classList.remove('hidden');
+    shareRow.classList.add('hidden');
+  } else {
+    joinBtn.textContent = 'Участвовать · ' + fLocal(r.nominal);
+    joinBtn.disabled = false;
+    joinBtn.classList.remove('hidden');
+    shareRow.classList.add('hidden');
+  }
+}
+
+const PLAYER_EMOJIS = ['😎','🤠','🥸','🧐','🤩','😏','🤓','🦊','🐸','🎭'];
+function playerEmoji(i){ return PLAYER_EMOJIS[i % PLAYER_EMOJIS.length]; }
+
+function joinCurrentRoom(){
+  if(!currentRoom) return;
+  haptic('heavy');
+  const r = currentRoom;
+  if(r.players.some(p=>p.id===TG_ID)){
+    toast('Вы уже в этой комнате','info');
+    return;
+  }
+  if(r.players.length >= r.maxPlayers){
+    toast('Комната заполнена','error');
+    return;
+  }
+  if(userData.balance < r.nominal){
+    toast('Недостаточно средств!','error');
+    return;
+  }
+
+  userData.balance -= r.nominal;
+  saveUser();
+  r.players.push({ id:TG_ID, name:TG_NAME, number:null });
+  if(r.isPrivate) savePrivate();
+
+  toast('Вы вошли в игру!','success');
+  renderGame();
+  updateAll();
+
+  // Check if room is full -> start game
+  if(r.players.length >= r.maxPlayers){
+    setTimeout(() => startGame(r), 800);
+  }
+}
+
+// ══════════════════════════════════════
+//  GAME ENGINE — Fisher-Yates + Animation
+// ══════════════════════════════════════
+function startGame(room){
+  if(!room) room = currentRoom;
+  if(!room || room.gameActive || room.gameFinished) return;
+  room.gameActive = true;
+
+  // Update UI if we're viewing this room
+  if(currentRoom?.id === room.id) renderGame();
+
+  // Assign random numbers using Fisher-Yates
+  const numbers = [];
+  for(let i=1;i<=room.maxPlayers;i++) numbers.push(i);
+  fisherYatesShuffle(numbers);
+  room.players.forEach((p,i) => p.number = numbers[i]);
+
+  // Determine winners (lowest numbers win)
+  const sorted = [...room.players].sort((a,b) => a.number - b.number);
+  const winnerCount = room.winners;
+  sorted.forEach((p,i) => { p.winner = i < winnerCount; });
+
+  const isViewing = currentRoom?.id === room.id;
+
+  if(isViewing){
+    // Animate number reveal
+    let spinCount = 0;
+    const spinInterval = setInterval(() => {
+      document.querySelectorAll('[id^="pnum_"]').forEach(el => {
+        if(!el.classList.contains('revealed')){
+          el.textContent = Math.floor(Math.random()*room.maxPlayers)+1;
+        }
+      });
+      spinCount++;
+      if(spinCount > 20){
+        clearInterval(spinInterval);
+        revealNumbers(room);
+      }
+    }, 80);
+  } else {
+    // Not viewing — finish immediately in background
+    setTimeout(() => finishGame(room), 500);
+  }
+}
+
+function revealNumbers(room){
+  if(!room) room = currentRoom;
+  if(!room) return;
+  room.gameFinished = true;
+  room.gameActive = false;
+
+  const isViewing = currentRoom?.id === room.id;
+
+  if(isViewing){
+    // Reveal with staggered delay
+    room.players.forEach((p, i) => {
+      setTimeout(() => {
+        const el = document.getElementById('pnum_'+i);
+        if(el){
+          el.textContent = p.number;
+          el.classList.remove('spinning');
+          el.classList.add('revealed');
+          el.style.color = p.winner ? 'var(--green)' : 'var(--red)';
+          haptic('light');
+        }
+        if(i === room.players.length - 1){
+          setTimeout(() => finishGame(room), 400);
+        }
+      }, i * 250);
+    });
+  } else {
+    finishGame(room);
+  }
+}
+
+function finishGame(room){
+  if(!room) room = currentRoom;
+  if(!room) return;
+
+  // Ensure state is set
+  room.gameFinished = true;
+  room.gameActive = false;
+
+  const me = room.players.find(p => p.id === TG_ID);
+  const won = me?.winner || false;
+  const prizeEach = room.prizeEach;
+  const isViewing = currentRoom?.id === room.id;
+
+  if(me){
+    if(won){
+      userData.balance += prizeEach;
+      userData.wins++;
+      userData.profit += (prizeEach - room.nominal);
+      haptic('heavy');
+      if(isViewing){
+        showWinToast(prizeEach);
+      } else {
+        // Background win notification
+        toast('🎉 Вы выиграли ' + fLocal(prizeEach) + ' в комнате ' + fLocal(room.nominal) + '!', 'success');
+      }
+    } else {
+      if(!isViewing){
+        toast('Игра завершена · ' + fLocal(room.nominal) + ' — не повезло', 'error');
+      }
+    }
+    userData.games++;
+    userData.history.push({
+      nominal: room.nominal, players: room.maxPlayers,
+      won, prize: prizeEach,
+      time: new Date().toLocaleString('ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})
+    });
+    saveUser();
+  }
+
+  if(isViewing) renderGame();
+  updateAll();
+
+  // Reset public room after delay
+  if(!room.isPrivate){
+    setTimeout(() => {
+      const idx = publicRooms.findIndex(rm => rm.id === room.id);
+      if(idx > -1){
+        publicRooms[idx].players = generateFakePlayers(room.maxPlayers);
+        publicRooms[idx].gameActive = false;
+        publicRooms[idx].gameFinished = false;
+        publicRooms[idx].resultPlayers = null;
+        publicRooms[idx].players.forEach(p => { p.number = null; p.winner = undefined; });
+      }
+      updateAll();
+    }, 5000);
+  }
+}
+
+function fisherYatesShuffle(arr){
+  for(let i = arr.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// ══════════════════════════════════════
+//  QUICK JOIN
+// ══════════════════════════════════════
+function quickJoin(){
+  haptic('medium');
+  // Find a room that's not full and not in-game
+  const available = publicRooms.filter(r =>
+    !r.gameActive && !r.gameFinished && r.players.length < r.maxPlayers &&
+    !r.players.some(p=>p.id===TG_ID) && userData.balance >= r.nominal
+  );
+  if(available.length === 0){
+    toast('Нет доступных комнат для вашего баланса','error');
+    return;
+  }
+  // Pick cheapest available
+  available.sort((a,b) => a.nominal - b.nominal);
+  openRoom(available[0].id);
+}
+
+// ══════════════════════════════════════
+//  JOIN BY CODE
+// ══════════════════════════════════════
+function joinByCode(){
+  haptic('medium');
+  const code = document.getElementById('codeInput').value.trim().toUpperCase();
+  if(!code || code.length < 4){
+    toast('Введите корректный код','error');
+    return;
+  }
+  const room = privateRooms.find(r => r.code === code);
+  if(!room){
+    toast('Комната не найдена','error');
+    return;
+  }
+  if(room.players.some(p=>p.id===TG_ID)){
+    openRoom(room.id);
+    return;
+  }
+  if(room.players.length >= room.maxPlayers){
+    toast('Комната уже заполнена','error');
+    return;
+  }
+  openRoom(room.id);
+}
+
+// ══════════════════════════════════════
+//  CABINET
+// ══════════════════════════════════════
+function showCabinet(){
+  haptic('medium');
+  const o = document.getElementById('cabinetOverlay');
+  o.classList.add('show');
+
+  document.getElementById('cabBalance').textContent = fLocal(userData.balance);
+  document.getElementById('cabBalanceSub').textContent = '≈ $' + userData.balance.toFixed(2);
+  document.getElementById('cabGames').textContent = userData.games;
+  document.getElementById('cabWins').textContent = userData.wins;
+  document.getElementById('cabWinRate').textContent = userData.games>0 ? Math.round((userData.wins/userData.games)*100)+'%' : '0%';
+  document.getElementById('cabProfit').textContent = (userData.profit>=0?'+':'') + fLocal(userData.profit);
+
+  // Recent history in cabinet
+  const hist = document.getElementById('cabHistory');
+  if(userData.history.length === 0){
+    hist.innerHTML = '<div style="text-align:center;padding:20px;color:var(--t3);font-size:13px">Нет истории игр</div>';
+  } else {
+    hist.innerHTML = userData.history.slice(-5).reverse().map(h => `
+      <div class="cab-history-item">
+        <div class="cab-history-left">
+          <div class="cab-history-icon ${h.won?'win':'loss'}">${h.won?'🏆':'💔'}</div>
+          <div class="cab-history-text">
+            <div class="h-title">${fLocal(h.nominal)} · ${h.players} игроков</div>
+            <div class="h-time">${h.time}</div>
+          </div>
+        </div>
+        <div class="cab-history-amount ${h.won?'win':'loss'}">${h.won?'+':'−'}${fLocal(h.won?h.prize:h.nominal)}</div>
+      </div>
+    `).join('');
+  }
+}
+
+function closeCabinet(){
+  haptic('light');
+  document.getElementById('cabinetOverlay').classList.remove('show');
+}
+
+// ══════════════════════════════════════
+//  DEPOSIT / WITHDRAW (Demo)
+// ══════════════════════════════════════
+function doDeposit(){
+  haptic('heavy');
+  // Demo: add $100
+  userData.balance += 100;
+  saveUser();
+  updateAll();
+  toast('+ ' + fLocal(100) + ' (демо)','success');
+  if(document.getElementById('cabinetOverlay').classList.contains('show')) showCabinet();
+}
+
+function doWithdraw(){
+  haptic('medium');
+  if(userData.balance <= 0){
+    toast('Баланс пуст','error');
+    return;
+  }
+  toast('Вывод будет доступен после подключения платёжной системы','info');
+}
+
+// ══════════════════════════════════════
+//  SHARING
+// ══════════════════════════════════════
+function shareTG(){
+  const text = '🏆 Я выиграл в Lucky Number! Попробуй и ты → @Nomer_13bot';
+  const url = 'https://t.me/share/url?text=' + encodeURIComponent(text);
+  window.open(url,'_blank');
+}
+function shareWA(){
+  const text = '🏆 Я выиграл в Lucky Number! Попробуй и ты → https://t.me/Nomer_13bot';
+  window.open('https://wa.me/?text=' + encodeURIComponent(text),'_blank');
+}
+
+// ══════════════════════════════════════
+//  TOASTS
+// ══════════════════════════════════════
+let toastTimer;
+function toast(msg, type='success'){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+function showWinToast(amount){
+  const el = document.getElementById('winToast');
+  document.getElementById('winAmount').textContent = fLocal(amount);
+  el.classList.add('show');
+}
+function closeWinToast(){
+  haptic('light');
+  document.getElementById('winToast').classList.remove('show');
+}
+
+// ══════════════════════════════════════
+//  AUTO-START WATCHER
+// ══════════════════════════════════════
+setInterval(() => {
+  [...publicRooms, ...privateRooms].forEach(room => {
+    // Start game for ANY full room (not just the one being viewed)
+    if(room.players.length >= room.maxPlayers && !room.gameActive && !room.gameFinished){
+      startGame(room);
+    }
+  });
+
+  // Simulate other players joining public rooms where the user is waiting
+  publicRooms.forEach(room => {
+    if(!room.gameActive && !room.gameFinished && room.players.length < room.maxPlayers){
+      if(room.players.some(p => p.id === TG_ID) && Math.random() < 0.15){
+        room.players.push({
+          id: 'bot_' + Date.now(),
+          name: randomName(),
+          number: null
+        });
+        if(currentRoom?.id === room.id) renderGame();
+        updateAll();
+      }
+    }
+  });
+
+  // Update "Мои" badge
+  updateMyBadge();
+}, 2000);
+
+function updateMyBadge(){
+  const activeCount = [...publicRooms, ...privateRooms].filter(r =>
+    r.players.some(p => p.id === TG_ID) && !r.gameFinished
+  ).length;
+  const badge = document.getElementById('myBadge');
+  if(badge){
+    if(activeCount > 0){
+      badge.textContent = activeCount;
+      badge.style.display = 'flex';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+}
+
+// ══════════════════════════════════════
+//  BOOT
+// ══════════════════════════════════════
+initPublicRooms();
+updateAll();
 </script>
 </body>
 </html>
